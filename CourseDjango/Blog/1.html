@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		pre {
+            overflow-x: auto;
+            white-space: pre-wrap;
+            white-space: -moz-pre-wrap;
+            white-space: -pre-wrap;
+            white-space: -o-pre-wrap;
+            word-wrap: break-word;
+		}
+	</style>
+	<link rel="stylesheet" href="1.css">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+</head>
+
+<body>
+	<div class="container">
+		<select id="usuarios" onchange="myFunction()">
+			<option value="null" name="Default">Select an article</option>
+		</select> 
+
+		<br><br><br>
+		<div class="crayons-article__header__meta">
+			<h1 id="name" class="fs-3xl s:fs-4xl l:fs-5xl fw-bold s:fw-heavy lh-tight mb-4 medium"></h1>
+		</div>
+		<p id="author"></p>
+		<span id="link"></span>
+	<!-- 	<input type="file" name="inputfile" id="inputfile">
+
+		<br> -->
+
+		<div id="body" class="article-wrapper"></div>
+
+		<script type="text/javascript">
+			
+			// select file to read
+			// document.getElementById('inputfile').addEventListener('change', function(){
+			// 	var fr = new FileReader()
+			// 	fr.onload = function(){
+			// 		document.getElementById('output').textContent = fr.result
+			// 	}
+			// 	fr.readAsText(this.files[0])
+			// })
+
+			// load json file
+			$(document).on('ready',function (){
+		 		
+				// $.getJSON('usuarios.json', function(data) {
+				$.getJSON('data.json', function(data) {
+					$.each(data["blogs"], function(indx, obj) {
+						$("#usuarios").append('<option value="' + obj["article"] + '">' + obj["link"] + '</option>');
+					}); // close each()
+				}); // close getJSON()
+
+			});
+
+			// Content of article will be displayed according to value option
+			function myFunction(){
+				const selectedArticle = document.getElementById("usuarios").value;
+				readTextFile("data.json", function(text){
+				    const data = JSON.parse(text);
+				    for (let i=0; i<data["blogs"].length; i++){
+				    	if (data["blogs"][i]["article"] == selectedArticle) {
+				    		document.getElementById("name").innerHTML = selectedArticle;
+				    		document.getElementById("author").innerHTML = data["blogs"][i]["author"];
+				    		document.getElementById("link").innerHTML = data["blogs"][i]["link"];
+				    		document.getElementById("body").innerHTML = data["blogs"][i]["content"];
+				    	}
+					}
+				});
+			}
+
+			// var fs = require('fs')
+			// fs.readFile('data.json', 'utf8', (err, jsonString) => {
+			//     if (err) {
+			//         console.log("File read failed:", err)
+			//         return
+			//     }
+			//     console.log('File data:', jsonString) 
+			// })
+
+			// read file json and then load it to browser
+			function readTextFile(file, callback) {
+			    const rawFile = new XMLHttpRequest();
+			    rawFile.overrideMimeType("application/json");
+			    rawFile.open("GET", file, true);
+			    rawFile.onreadystatechange = function() {
+			        if (rawFile.readyState === 4 && rawFile.status == "200") {
+			            callback(rawFile.responseText);
+			        }
+			    }
+			    rawFile.send(null);
+			}
+
+			//usage:
+			// readTextFile("data.json", function(text){
+			//     const data = JSON.parse(text);
+			//     document.write(data["blogs"][2]["content"]);
+			// });
+
+		</script>
+
+	</div>
+</body>
+</html>

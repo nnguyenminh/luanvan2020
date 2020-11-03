@@ -1,0 +1,92 @@
+{% load static %}
+	  <nav class="navbar px-md-0 navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+	    <div class="container">
+	      <a class="navbar-brand" href="index.html">Read<i>it</i>.</a>
+	      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+	        <span class="oi oi-menu">Menu</span>
+	      </button>
+
+	      <div class="collapse navbar-collapse" id="ftco-nav">
+	        <ul class="navbar-nav ml-auto">
+	          <li class="nav-item active"><a href="index.html" class="nav-link">Home</a></li>
+	          <li class="nav-item"><a href="{% url 'article' %}" class="nav-link">Articles</a></li>
+	          <li class="nav-item"><a href="about.html" class="nav-link">Team</a></li>
+	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+	        </ul>
+	      </div>
+	    </div>
+	  </nav>
+    <!-- END nav -->
+    
+    <div class="hero-wrap js-fullheight" style="background-image: url('static/images/bg_1.jpg'); height: 792px; background-position: 50% 0%;" data-stellar-background-ratio="0.5">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row no-gutters slider-text js-fullheight align-items-center justify-content-start" data-scrollax-parent="true">
+          <div class="col-md-12 ftco-animate">
+          	<h2 class="subheading">Hello! Welcome to</h2>
+          	<h1 class="mb-4 mb-md-0">Readit blog</h1>
+          	<div class="row">
+          		<div class="col-md-7">
+          			<div class="text">
+	          			<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
+	          			<div class="mouse">
+							<a href="#" class="mouse-icon">
+								<div class="mouse-wheel"><span class="ion-ios-arrow-round-down"></span></div>
+							</a>
+						</div>
+					</div>
+          		</div>
+          	</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- <style type="text/css">
+
+	@media (min-width: 768px) {
+	  html {
+	    font-size: 16px;
+	  }
+	}
+
+	.container {
+	  max-width: 960px;
+	}
+
+	.pricing-header {
+	  max-width: 700px;
+	}
+
+	.card-deck .card {
+	  min-width: 220px;
+	}
+
+	.h3 {
+		text-align: center;
+	}
+
+</style> -->
+
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+	<h5 class="my-0 mr-md-auto font-weight-normal">Hello, {{ request.user.username }}</h5>
+	<nav class="my-2 my-md-0 mr-md-3">
+<!-- 		<a class="p-2 text-dark" href="#">Features</a>
+		<a class="p-2 text-dark" href="#">Enterprise</a>
+		<a class="p-2 text-dark" href="#">Support</a>
+		<a class="p-2 text-dark" href="#">Pricing</a> -->
+
+	{% if request.user.is_authenticated %}
+		<a class="p-2 text-dark"  href="{% url 'home' %}">Home</a>
+		<a class="p-2 text-dark"  href="{% url 'account' %}">Account</a>
+		<a class="p-2 text-dark"  href="{% url 'logout' %}">Logout</a>
+
+	{% else %}
+		<a class="p-2 text-dark"  href="{% url 'home' %}">Home</a>
+		<a class="p-2 text-dark"  href="{% url 'login' %}">Login</a>
+		<a class="btn btn-outline-primary"  href="{% url 'register' %}">Register</a>
+
+	{% endif %}
+	</nav>
+	<a class="btn btn-outline-primary" href="#">Sign up</a>
+</div>

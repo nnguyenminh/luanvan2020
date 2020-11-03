@@ -1,22 +1,20 @@
-
-
 {% extends 'base.html' %}
-
 
 {% block content %}
 
-	<div style="border: 5px solid #000;">
-		<h1>This is body, line h1</h1>
-		<p>This is p line</p>
-		{{some_string}}
-		{{some_number}}
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+	<h1 class="display-4">Tech Top Blog Complication</h1>
+	<p class="lead">We create this website for all greate talent developer out there, we love coding and you too. These blogs are collected from many sources, hope you find it useful and contribute to us if you want</p>
+</div>
 
-		{% for question in questions %}
-			{% include 'personal/snippets/body_snippet.html' with value=question %}
+<div class="container">
+	<div class="d-flex flex-column">
+		<h3>Registered users:</h3>
+		{% for account in accounts %}
+		<p>{{account}} | {{account.date_joined}}</p>
 		{% endfor %}
-
-
-
 	</div>
+</div>
+
 
 {% endblock content %}
