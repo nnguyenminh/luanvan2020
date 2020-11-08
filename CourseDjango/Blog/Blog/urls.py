@@ -16,7 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from personal.views import (homeScreenView, article_view, )
+from personal.views import (
+    homeScreenView,
+    article_view,
+    about_view,
+    contact_view,
+    )
 from account.views import (
     registration_view,
     logout_view,
@@ -33,4 +38,6 @@ urlpatterns = [
     path('login/', login_view, name="login"),
     path('account/', account_view, name="account"),
     path('article/', article_view, name="article"),
+    path('about/', article_view, name="about"),
+    path('contact/', contact_view, name="contact"),
 ]
