@@ -21,6 +21,12 @@ def blogView(request):
 
 
 
+def aboutView(request):
+
+	return render(request, 'techBlog/about.html')
+
+
+
 def contactView(request):
 
 	return render(request, 'techBlog/contact.html')
