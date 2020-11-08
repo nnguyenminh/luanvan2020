@@ -5,10 +5,12 @@ from djongo import models
 
 class Post(models.Model):
     _id = models.ObjectIdField()
+    # id = models.AutoField()
+    category = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    content = models.JSONField()
     comment = models.JSONField()
-    date = models.DateField()
+    date = models.DateTimeField(auto_now_add=True)
     # tag = models.JSONField()
     # author_details = models.JSONField()
     objects = models.DjongoManager()

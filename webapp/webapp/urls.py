@@ -19,10 +19,5 @@ from blog import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('add_post/', views.add_post),
-    # path('update_post/<int:id>', views.update_post),
-    # path('delete_post/<int:id>', views.delete_post),
-    # path('read_post/<str:id>', views.read_post),
-    # path('read_post_all', views.read_post_all),
-    path('api/', include('blog.blog_urls'))
+    path('blog/', include('blog.urls'))
 ]
