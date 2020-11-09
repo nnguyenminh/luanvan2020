@@ -8,7 +8,7 @@ urlpatterns = [
     path('api/post/search/<str:id>', views.read_post),
     path('api/post/all', views.read_post_all),
     path('home/', views.home, name="home"),
-    path('home/page=<int:page>', views.home),
+    path('home/page=<int:page>', views.home, name="home"),
     path('article/', views.article, name="article"),
     path('about/', views.about, name="about"),
     path('blog/', views.blog, name="blog"),

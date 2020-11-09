@@ -7,6 +7,9 @@ from django.views.decorators.csrf import csrf_exempt
 from blog.models import Post
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 
+MAX_POST = 9
+MAX_PAGE = 5
+
 
 # Create your views here.
 @csrf_exempt
@@ -58,8 +61,8 @@ def read_post(request, id):
 def read_post_all(request, page=1):
     post = Post.objects.all().order_by('date')
     data = []
-    for i in range(9):
-        index = i + (page - 1) * 9
+    for i in range(MAX_POST):
+        index = i + (page - 1) * MAX_POST
         data.append({
             "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
             "category": post[index].category,
@@ -73,21 +76,22 @@ def read_post_all(request, page=1):
 
 def get_recent_posts(page):
     post = Post.objects.all().order_by('date')
-    length = len(post)
-    print(length)
+    max_length = len(post)
     data = []
-    for i in range(9):
-        index = i + (page - 1) * 9
-        if index < length:
-            data.append({"id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
-                         "category": post[index].category,
-                         "title": post[index].title,
-                         "content": post[index].content,
-                         "comment": post[index].comment,
-                         "date": post[index].date})
+    for i in range(MAX_POST):
+        index = i + (page - 1) * MAX_POST
+        if index < max_length:
+            data.append({
+                "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
+                "category": post[index].category,
+                "title": post[index].title,
+                "content": post[index].content,
+                "comment": post[index].comment,
+                "date": post[index].date
+            })
         else:
             break
-    return data
+    return data, max_length
 
 
 def get_post(id):
@@ -102,9 +106,47 @@ def get_post(id):
     return data
 
 
+def modify_bottom_nav_bar(max_length, page):
+    div = int(max_length / MAX_POST) + 1
+    mod = int(max_length % MAX_POST)
+    page_nav = 0
+
+    if mod == 0:
+        div -= 1
+
+    if page == 1:
+        prev_nav = 1
+        next_nav = page + 1
+    elif page == max_length:
+        prev_nav = page - 1
+        next_nav = page
+    else:
+        prev_nav = page - 1
+        next_nav = page + 1
+
+    if page < MAX_PAGE:
+        if div > MAX_PAGE:
+            page_nav = range(1, MAX_PAGE + 1)
+        else:
+            page_nav = range(1, div + 1)
+    if page >= MAX_PAGE:
+        if page + 2 > div:
+            page_nav = range(div - (MAX_PAGE - 1), div + 1)
+        else:
+            page_nav = range(page - int(MAX_PAGE / 2), page + int(MAX_PAGE / 2) + 1)
+
+    nav_bar = [1, prev_nav, page_nav, next_nav, div]
+    return nav_bar
+
+
 def home(request, page=1):
-    data = get_recent_posts(page)
-    context = {"data": data}
+    data, max_length = get_recent_posts(page)
+    nav_bar = modify_bottom_nav_bar(max_length, page)
+    context = {
+        "data": data,
+        "nav_bar": nav_bar,
+        "page": page,
+    }
     return render(request, 'home.html', context)
 
 
