@@ -177,3 +177,7 @@ def post(request, id):
                'recent': recent_posts_data}
     return render(request, 'post.html', context)
     pass
+
+
+def category(request, cat):
+    return render(request, f'{cat}.html')
