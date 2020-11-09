@@ -87,7 +87,7 @@ DATABASES = {
         'ENGINE': 'djongo',
         'NAME': 'blog_data',
         'CLIENT': {
-            'host': '192.168.1.10',
+            'host': '127.0.0.1',
             'port': 27017
         }
    }

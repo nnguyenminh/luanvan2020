@@ -150,16 +150,20 @@ def home(request, page=1):
     return render(request, 'home.html', context)
 
 
-def article(request):
-    return render(request, 'article.html')
+def technology(request):
+    return render(request, 'technology.html')
+
+
+def tutorial(request):
+    return render(request, 'tutorial.html')
 
 
 def blog(request):
     return render(request, 'blog.html')
 
 
-def about(request):
-    return render(request, 'about.html')
+def design(request):
+    return render(request, 'design.html')
 
 
 def contact(request):
