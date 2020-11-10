@@ -7,8 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from blog.models import Post
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 
-MAX_POST = 9
-MAX_PAGE = 5
+MAX_POST = 3
+MAX_PAGE = 3
 
 
 # Create your views here.
@@ -81,6 +81,8 @@ def get_recent_posts(page):
     for i in range(MAX_POST):
         index = i + (page - 1) * MAX_POST
         if index < max_length:
+            if len(post[index].title) > 40:
+                post[index].title = post[index].title[:27] + '...'
             data.append({
                 "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
                 "category": post[index].category,
@@ -114,15 +116,15 @@ def modify_bottom_nav_bar(max_length, page):
     if mod == 0:
         div -= 1
 
-    if page == 1:
-        prev_nav = 1
-        next_nav = page + 1
-    elif page == max_length:
-        prev_nav = page - 1
-        next_nav = page
-    else:
-        prev_nav = page - 1
-        next_nav = page + 1
+    # if page == 1:
+    #     prev_nav = 1
+    #     next_nav = page + 1
+    # elif page == div:
+    #     prev_nav = page - 1
+    #     next_nav = page
+    # else:
+    #     prev_nav = page - 1
+    #     next_nav = page + 1
 
     if page < MAX_PAGE:
         if div > MAX_PAGE:
@@ -135,7 +137,17 @@ def modify_bottom_nav_bar(max_length, page):
         else:
             page_nav = range(page - int(MAX_PAGE / 2), page + int(MAX_PAGE / 2) + 1)
 
-    nav_bar = [1, prev_nav, page_nav, next_nav, div]
+    if page == 1:
+        first = 0
+    else:
+        first = 1
+
+    if page == div:
+        last = 0
+    else:
+        last = div
+
+    nav_bar = [first, page_nav, last]
     return nav_bar
 
 
@@ -158,10 +170,6 @@ def tutorial(request):
     return render(request, 'tutorial.html')
 
 
-def blog(request):
-    return render(request, 'blog.html')
-
-
 def design(request):
     return render(request, 'design.html')
 
@@ -176,8 +184,10 @@ def post(request, id):
     context = {'post': post_data,
                'recent': recent_posts_data}
     return render(request, 'post.html', context)
-    pass
 
 
 def category(request, cat):
-    return render(request, f'{cat}.html')
+    context = {
+        "nav_tab": cat
+    }
+    return render(request, f'{cat}.html', context)

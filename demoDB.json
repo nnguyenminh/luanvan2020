@@ -1198,5 +1198,245 @@
     "date": {
       "$date": "2020-11-08T19:19:07.240Z"
     }
+  },
+  {
+    "_id": {
+      "$oid": "5fa844ab3f997712e2706058"
+    },
+    "id": 35,
+    "category": "category 01",
+    "title": "The second part of the output shows the list of files containing tests and the result of each test",
+    "content": [{
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "In this post I'm going to be compiling all of the computer science concepts I've learned to create a study guide on most of the general technical skills you would need to know. If there's anything I missed please let me know and I'll be sure to add it to the list. All of the code for this is going to be in Javascript. If I previously posted about a topic I'll be sure to link to it. Here we go.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "You're going to need to know iteration and recursion, arrays and matrices, linked lists, queues, stacks, heaps, sets, hash maps, trees, binary search, graphs, traversals like breadth-first search and depth-first search, tries, and sorting algorithms (particularly merge sort and quick sort). Also knowing some dynamic programming concepts could be helpful such as memoization and divide and conqueror.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "The file with all of the code examples can be found here. I'll be continuously updating this file in the future and plan on posting a similar cheatsheet with all of the code implemented in Ruby.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      }
+    ],
+    "comment": [{
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      },
+      {
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      }
+    ],
+    "date": {
+      "$date": "2020-11-08T19:19:07.240Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "5fa844ab3f997715e2706058"
+    },
+    "id": 35,
+    "category": "category 01",
+    "title": "The second part of the output shows the list of files containing tests and the result of each test",
+    "content": [{
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "In this post I'm going to be compiling all of the computer science concepts I've learned to create a study guide on most of the general technical skills you would need to know. If there's anything I missed please let me know and I'll be sure to add it to the list. All of the code for this is going to be in Javascript. If I previously posted about a topic I'll be sure to link to it. Here we go.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "You're going to need to know iteration and recursion, arrays and matrices, linked lists, queues, stacks, heaps, sets, hash maps, trees, binary search, graphs, traversals like breadth-first search and depth-first search, tries, and sorting algorithms (particularly merge sort and quick sort). Also knowing some dynamic programming concepts could be helpful such as memoization and divide and conqueror.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "The file with all of the code examples can be found here. I'll be continuously updating this file in the future and plan on posting a similar cheatsheet with all of the code implemented in Ruby.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      }
+    ],
+    "comment": [{
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      },
+      {
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      }
+    ],
+    "date": {
+      "$date": "2020-11-08T19:19:07.240Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "5fa844ab3f927715e2706058"
+    },
+    "id": 35,
+    "category": "category 01",
+    "title": "The second part of the output shows the list of files containing tests and the result of each test",
+    "content": [{
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "In this post I'm going to be compiling all of the computer science concepts I've learned to create a study guide on most of the general technical skills you would need to know. If there's anything I missed please let me know and I'll be sure to add it to the list. All of the code for this is going to be in Javascript. If I previously posted about a topic I'll be sure to link to it. Here we go.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "You're going to need to know iteration and recursion, arrays and matrices, linked lists, queues, stacks, heaps, sets, hash maps, trees, binary search, graphs, traversals like breadth-first search and depth-first search, tries, and sorting algorithms (particularly merge sort and quick sort). Also knowing some dynamic programming concepts could be helpful such as memoization and divide and conqueror.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "The file with all of the code examples can be found here. I'll be continuously updating this file in the future and plan on posting a similar cheatsheet with all of the code implemented in Ruby.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      }
+    ],
+    "comment": [{
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      },
+      {
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      }
+    ],
+    "date": {
+      "$date": "2020-11-08T19:19:07.240Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "5fa844ab3f997711e2706058"
+    },
+    "id": 35,
+    "category": "category 01",
+    "title": "The second part of the output shows the list of files containing tests and the result of each test",
+    "content": [{
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "In this post I'm going to be compiling all of the computer science concepts I've learned to create a study guide on most of the general technical skills you would need to know. If there's anything I missed please let me know and I'll be sure to add it to the list. All of the code for this is going to be in Javascript. If I previously posted about a topic I'll be sure to link to it. Here we go.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "You're going to need to know iteration and recursion, arrays and matrices, linked lists, queues, stacks, heaps, sets, hash maps, trees, binary search, graphs, traversals like breadth-first search and depth-first search, tries, and sorting algorithms (particularly merge sort and quick sort). Also knowing some dynamic programming concepts could be helpful such as memoization and divide and conqueror.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      },
+      {
+        "section_title": "And again, as you notice, we made the smallest possible addition to the code to pass the test. Running pytest again you should receive a different error message",
+        "section_content": [
+          "The file with all of the code examples can be found here. I'll be continuously updating this file in the future and plan on posting a similar cheatsheet with all of the code implemented in Ruby.",
+          "This is the first proper pytest failure report that we receive, so it's time to learn how to read the output. The first lines show you general information about the system where the tests are run"
+        ]
+      }
+    ],
+    "comment": [{
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      },
+      {
+        "content": "content 01",
+        "comment_date": "2020-10-17",
+        "child": [{
+            "content": "content child 01",
+            "comment_date": "2020-10-17"
+          },
+          {
+            "content": "content child 02",
+            "comment_date": "2020-10-17"
+          }
+        ]
+      }
+    ],
+    "date": {
+      "$date": "2020-11-08T19:19:07.240Z"
+    }
   }
 ]

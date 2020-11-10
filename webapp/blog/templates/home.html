@@ -15,7 +15,7 @@
                         <div class="col-md-6 col-lg-6 col-xl-4 d-flex">
                             <div class="text w-100 pl-md-3">
                                 <span class="subheading">{{ post.category }}</span>
-                                <h2><a href=" {% url 'blog' %} ">{{ post.title }}</a></h2>
+                                <h2><a href=" {% url 'post' id=post.id %} ">{{ post.title }}</a></h2>
                                 <div class="meta">
                                     <p class="mb-0">{{ post.date }}</p>
                                 </div>
@@ -30,17 +30,19 @@
             <div class="col text-center">
                 <div class="block-27">
                     <ul>
+                        {% if nav_bar.0 != 0%}
                         <li><a href="{% url 'home' page=nav_bar.0 %}">&lt;&lt;</a></li>
-                        <li><a href="{% url 'home' page=nav_bar.1 %}">&lt;</a></li>
-                        {% for i in nav_bar.2 %}
+                        {% endif %}
+                        {% for i in nav_bar.1 %}
                         {% if i == page %}
                         <li class="active"><span>{{ i }}</span></li>
                         {% else %}
                         <li><a href="page={{ i }}">{{ i }}</a></li>
                         {% endif %}
                         {% endfor %}
-                        <li><a href="{% url 'home' page=nav_bar.3 %}">&gt;</a></li>
-                        <li><a href="{% url 'home' page=nav_bar.4 %}">&gt;&gt;</a></li>
+                        {% if nav_bar.2 != 0%}
+                        <li><a href="{% url 'home' page=nav_bar.2 %}">&gt;&gt;</a></li>
+                        {% endif %}
 <!--                        <li><a href="#">&lt;</a></li>-->
 <!--                        <li class="active"><span>1</span></li>-->
 <!--                        <li><a href="page=2">2</a></li>-->
