@@ -164,7 +164,7 @@ def tutorial(request):
 
 
 def design(request):
-    return render(request, 'design.html')
+    pass
 
 
 def contact(request):
@@ -198,7 +198,6 @@ def search_in_mongo(list_keywords):
     for raw_keyword in list_keywords:
         # x = collection.find({"$text": {"$search": f'"{keyword}"'}})
         search_result = collection.find({"$text": {"$search": raw_keyword}})
-        count = search_result.count()
         keyword = collection.find({"$text": {"$search": raw_keyword}}).explain()["queryPlanner"]["winningPlan"][
             "parsedTextQuery"]["terms"]
         if keyword:
@@ -208,11 +207,11 @@ def search_in_mongo(list_keywords):
             if item not in result:
                 result.append(item)
 
-    return keywords, result, count
+    return keywords, result
 
 
 def load_dictionary():
-    f = open("static/dictionary.txt", "r")
+    f = open("blog\\static\\dictionary.txt", "r")
     temp = f.read()
     temp = temp.replace("'", '"')
     temp = temp[temp.find("{"):-1]
@@ -222,14 +221,14 @@ def load_dictionary():
 
 
 def add_css_highlight_background(word):
-    return fr'<span style=\"background-color=yellow;\">{word}</span>'
+    return fr'<span style=\"color:red;font-weight:500;background-color:yellow\">{word}</span>'
 
 
 def search(request, page=1):
     raw_request = str(request)
     raw_keywords = raw_request[raw_request.find("keyword") + 7:-2]
     raw_keywords = raw_keywords.split(" ")
-    keywords, search_result, count = search_in_mongo(raw_keywords)
+    keywords, search_result = search_in_mongo(raw_keywords)
 
     dictionary = load_dictionary()
     new = add_css_highlight_background
@@ -246,6 +245,9 @@ def search(request, page=1):
 
         result.append(json.loads(item_as_string))
 
+    context = {
+        "result" : result
+    }
+    print(context['result'])
 
-
-    return render(request, 'test2.html')
+    return render(request, 'test2.html', context)
