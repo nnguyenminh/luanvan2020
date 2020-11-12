@@ -155,18 +155,6 @@ def home(request, page=1):
     return render(request, 'home.html', context)
 
 
-def technology(request):
-    return render(request, 'technology.html')
-
-
-def tutorial(request):
-    return render(request, 'tutorial.html')
-
-
-def design(request):
-    pass
-
-
 def contact(request):
     return render(request, 'contact.html')
 
@@ -227,27 +215,49 @@ def add_css_highlight_background(word):
 def search(request, page=1):
     raw_request = str(request)
     raw_keywords = raw_request[raw_request.find("keyword") + 7:-2]
-    raw_keywords = raw_keywords.split(" ")
-    keywords, search_result = search_in_mongo(raw_keywords)
+    list_raw_keywords = raw_keywords.split(" ")
+    keywords, search_result = search_in_mongo(list_raw_keywords)
 
     dictionary = load_dictionary()
-    new = add_css_highlight_background
+    new_font = add_css_highlight_background
     result = []
+    data = []
 
     for item in search_result:
         item_as_string = json.dumps(item, default=json_util.default)
         for keyword in keywords:
             if keyword in dictionary:
                 for value in dictionary[keyword]:
-                    item_as_string = item_as_string.replace(value, new(value))
+                    item_as_string = item_as_string.replace(value, new_font(value))
             else:
-                item_as_string = item_as_string.replace(keyword, new(keyword))
+                item_as_string = item_as_string.replace(keyword, new_font(keyword))
 
         result.append(json.loads(item_as_string))
 
-    context = {
-        "result" : result
-    }
-    print(context['result'])
+    print(result)
+    max_length = len(result)
 
-    return render(request, 'test2.html', context)
+    nav_bar = modify_bottom_nav_bar(max_length, page, MAX_SEARCH_RESULT)
+
+    for i in range(MAX_SEARCH_RESULT):
+        index = i + (page - 1) * MAX_POST
+        if index < max_length:
+            data.append({
+                "id": json.loads(json.dumps(result[index]["_id"], default=json_util.default))["$oid"],
+                "category": result[index]["category"],
+                "title": result[index]["title"],
+                "content": result[index]["content"],
+                "comment": result[index]["comment"],
+                "date": result[index]["date"]
+            })
+        else:
+            break
+
+    context = {
+        "data": data,
+        "nav_bar": nav_bar,
+        "page": page,
+        "keyword": raw_keywords
+    }
+
+    return render(request, 'search.html', context)
