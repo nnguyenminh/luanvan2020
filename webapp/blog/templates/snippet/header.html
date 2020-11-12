@@ -13,10 +13,10 @@
                 <li class="nav-item {% if nav_tab == 'tutorial' %} active {%endif%}"><a href=" {% url 'category' cat='tutorial' %} " class="nav-link">Tutorial</a></li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'contact' %} active {%endif%}"><a href=" {% url 'contact' %} " class="nav-link">Contact</a></li>
                 <li style="display:flex; align-items:center; max-width: 12rem;">
-                    <form action="#" class="search-form">
+                    <form action="{% url 'search' %}" class="search-form">
                         <div class="form-group" style="margin-bottom:0 !important;" >
                             <span class="icon icon-search"></span>
-                            <input type="text" class="form-control" placeholder="Search me">
+                            <input type="text" class="form-control" placeholder="Search me" name="keyword">
                         </div>
                     </form>
                 </li>

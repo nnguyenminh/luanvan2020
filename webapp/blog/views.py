@@ -1,5 +1,7 @@
 import json
+from urllib.parse import unquote
 
+import pymongo
 from bson import ObjectId, json_util
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -9,6 +11,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 
 MAX_POST = 3
 MAX_PAGE = 3
+MAX_SEARCH_RESULT = 10
 
 
 # Create your views here.
@@ -108,23 +111,13 @@ def get_post(id):
     return data
 
 
-def modify_bottom_nav_bar(max_length, page):
-    div = int(max_length / MAX_POST) + 1
-    mod = int(max_length % MAX_POST)
+def modify_bottom_nav_bar(max_length, page, MAX):
+    div = int(max_length / MAX) + 1
+    mod = int(max_length % MAX)
     page_nav = 0
 
     if mod == 0:
         div -= 1
-
-    # if page == 1:
-    #     prev_nav = 1
-    #     next_nav = page + 1
-    # elif page == div:
-    #     prev_nav = page - 1
-    #     next_nav = page
-    # else:
-    #     prev_nav = page - 1
-    #     next_nav = page + 1
 
     if page < MAX_PAGE:
         if div > MAX_PAGE:
@@ -153,7 +146,7 @@ def modify_bottom_nav_bar(max_length, page):
 
 def home(request, page=1):
     data, max_length = get_recent_posts(page)
-    nav_bar = modify_bottom_nav_bar(max_length, page)
+    nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST)
     context = {
         "data": data,
         "nav_bar": nav_bar,
@@ -191,3 +184,68 @@ def category(request, cat):
         "nav_tab": cat
     }
     return render(request, f'{cat}.html', context)
+
+
+def search_in_mongo(list_keywords):
+    client = pymongo.MongoClient()
+    db = client['blog_data']
+    collection = db["blog_post"]
+    collection.create_index([('title', 'text'), ('content.section_title', 'text'), ('content.section_content', 'text')])
+    keywords = []
+    result = []
+    count = 0
+
+    for raw_keyword in list_keywords:
+        # x = collection.find({"$text": {"$search": f'"{keyword}"'}})
+        search_result = collection.find({"$text": {"$search": raw_keyword}})
+        count = search_result.count()
+        keyword = collection.find({"$text": {"$search": raw_keyword}}).explain()["queryPlanner"]["winningPlan"][
+            "parsedTextQuery"]["terms"]
+        if keyword:
+            keywords.append(keyword[0])
+        print(keywords)
+        for item in search_result:
+            if item not in result:
+                result.append(item)
+
+    return keywords, result, count
+
+
+def load_dictionary():
+    f = open("static/dictionary.txt", "r")
+    temp = f.read()
+    temp = temp.replace("'", '"')
+    temp = temp[temp.find("{"):-1]
+    dictionary = json.loads(temp)
+    f.close()
+    return dictionary
+
+
+def add_css_highlight_background(word):
+    return fr'<span style=\"background-color=yellow;\">{word}</span>'
+
+
+def search(request, page=1):
+    raw_request = str(request)
+    raw_keywords = raw_request[raw_request.find("keyword") + 7:-2]
+    raw_keywords = raw_keywords.split(" ")
+    keywords, search_result, count = search_in_mongo(raw_keywords)
+
+    dictionary = load_dictionary()
+    new = add_css_highlight_background
+    result = []
+
+    for item in search_result:
+        item_as_string = json.dumps(item, default=json_util.default)
+        for keyword in keywords:
+            if keyword in dictionary:
+                for value in dictionary[keyword]:
+                    item_as_string = item_as_string.replace(value, new(value))
+            else:
+                item_as_string = item_as_string.replace(keyword, new(keyword))
+
+        result.append(json.loads(item_as_string))
+
+
+
+    return render(request, 'test2.html')
