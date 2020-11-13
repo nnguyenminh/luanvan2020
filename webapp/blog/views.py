@@ -1,15 +1,15 @@
 import json
 from urllib.parse import unquote
-
+from random import randrange
 import pymongo
 from bson import ObjectId, json_util
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 from blog.models import Post
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 
-MAX_POST = 3
+MAX_POST = 4
 MAX_PAGE = 3
 MAX_SEARCH_RESULT = 10
 
@@ -19,7 +19,7 @@ MAX_SEARCH_RESULT = 10
 def add_post(request):
     if request.method == 'POST':
         received_json_data = json.loads(request.body)
-        category = received_json_data['category']
+        # category = received_json_data['category']
         title = received_json_data["title"]
         content = received_json_data["content"]
         for section in content:
@@ -68,7 +68,7 @@ def read_post_all(request, page=1):
         index = i + (page - 1) * MAX_POST
         data.append({
             "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
-            "category": post[index].category,
+            # "category": post[index].category,
             "title": post[index].title,
             "content": post[index].content,
             "comment": post[index].comment,
@@ -78,7 +78,7 @@ def read_post_all(request, page=1):
 
 
 def get_recent_posts(page):
-    post = Post.objects.all().order_by('date')
+    post = Post.objects.all().order_by('created_at')
     max_length = len(post)
     data = []
     for i in range(MAX_POST):
@@ -87,12 +87,13 @@ def get_recent_posts(page):
             if len(post[index].title) > 40:
                 post[index].title = post[index].title[:27] + '...'
             data.append({
-                "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
+                # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
+                "id": post[index].id,
                 "category": post[index].category,
                 "title": post[index].title,
                 "content": post[index].content,
-                "comment": post[index].comment,
-                "date": post[index].date
+                "comment": post[index].comments,
+                "date": post[index].created_at
             })
         else:
             break
@@ -100,13 +101,34 @@ def get_recent_posts(page):
 
 
 def get_post(id):
-    post = Post.objects.get(_id=ObjectId(id))
+    # post = Post.objects.get(_id=ObjectId(id))
+    post = get_object_or_404(Post, id=int(id))
+    parent = []
+    children = {}
+    comments = post.comments.all().order_by('created_at').values()
+    for comment in comments:
+        if not comment["parent_id"]:
+            parent.append(comment)
+        else:
+            if str(comment["parent_id"]) in children.keys():
+                p = children[str(comment["parent_id"])]
+                p.append(comment)
+            else:
+                children[str(comment["parent_id"])] = [comment]
+    #
+    # print(parent)
+    # print("======")
+    # print(children)
+
+
+
     data = {
+        "id": post.id,
         "category": post.category,
         "title": post.title,
         "content": post.content,
-        "comment": post.comment,
-        "date": post.date,
+        "comment": comments,
+        "date": post.created_at,
     }
     return data
 
@@ -159,11 +181,26 @@ def contact(request):
     return render(request, 'contact.html')
 
 
+def random_int(num, fr, to):
+    result = []
+    while True:
+        x = randrange(int(fr), int(to))
+        if x not in result:
+            result.append(x)
+        if len(result) == num:
+            break
+
+    return result
+
+
 def post(request, id):
     post_data = get_post(id)
-    recent_posts_data = get_recent_posts(1)
-    context = {'post': post_data,
-               'recent': recent_posts_data}
+    # recent_posts_data = get_recent_posts(1)
+    # indexes = random_int(2, 0, MAX_POST-1)
+    # recent_posts = []
+    # for i in indexes:
+    #     recent_posts.append(recent_posts_data[i])
+    context = {'post': post_data}
     return render(request, 'post.html', context)
 
 
@@ -178,10 +215,10 @@ def search_in_mongo(list_keywords):
     client = pymongo.MongoClient()
     db = client['blog_data']
     collection = db["blog_post"]
-    collection.create_index([('title', 'text'), ('content.section_title', 'text'), ('content.section_content', 'text')])
+    collection.create_index([('title', 'text'), ('content', 'text')])
     keywords = []
+    result_id = []
     result = []
-    count = 0
 
     for raw_keyword in list_keywords:
         # x = collection.find({"$text": {"$search": f'"{keyword}"'}})
@@ -192,8 +229,9 @@ def search_in_mongo(list_keywords):
             keywords.append(keyword[0])
         print(keywords)
         for item in search_result:
-            if item not in result:
-                result.append(item)
+            if item not in result_id:
+                result_id.append(item['id'])
+                result.append(get_post(item['id']))
 
     return keywords, result
 
@@ -209,33 +247,29 @@ def load_dictionary():
 
 
 def add_css_highlight_background(word):
-    return fr'<span style=\"color:red;font-weight:500;background-color:yellow\">{word}</span>'
+    return fr'<span style=color:red;font-weight:500;background-color:yellow>{word}</span>'
 
 
 def search(request, page=1):
     raw_request = str(request)
-    raw_keywords = raw_request[raw_request.find("keyword") + 7:-2]
+    raw_keywords = raw_request[raw_request.find("keyword") + 8:-2]
     list_raw_keywords = raw_keywords.split(" ")
     keywords, search_result = search_in_mongo(list_raw_keywords)
 
     dictionary = load_dictionary()
     new_font = add_css_highlight_background
-    result = []
     data = []
 
     for item in search_result:
-        item_as_string = json.dumps(item, default=json_util.default)
         for keyword in keywords:
             if keyword in dictionary:
                 for value in dictionary[keyword]:
-                    item_as_string = item_as_string.replace(value, new_font(value))
+                    item['title'] = item['title'].replace(value, new_font(value))
+                    item['content'] = item['content'].replace(value, new_font(value))
             else:
-                item_as_string = item_as_string.replace(keyword, new_font(keyword))
-
-        result.append(json.loads(item_as_string))
-
-    print(result)
-    max_length = len(result)
+                item['title'] = item['title'].replace(keyword, new_font(keyword))
+                item['content'] = item['content'].replace(keyword, new_font(keyword))
+    max_length = len(search_result)
 
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_SEARCH_RESULT)
 
@@ -243,21 +277,27 @@ def search(request, page=1):
         index = i + (page - 1) * MAX_POST
         if index < max_length:
             data.append({
-                "id": json.loads(json.dumps(result[index]["_id"], default=json_util.default))["$oid"],
-                "category": result[index]["category"],
-                "title": result[index]["title"],
-                "content": result[index]["content"],
-                "comment": result[index]["comment"],
-                "date": result[index]["date"]
+                "id": search_result[index]["id"],
+                "category": search_result[index]["category"],
+                "title": search_result[index]["title"],
+                "content": search_result[index]["content"],
+                "comment": search_result[index]["comment"],
+                "date": search_result[index]["date"]
             })
         else:
             break
 
-    context = {
-        "data": data,
-        "nav_bar": nav_bar,
-        "page": page,
-        "keyword": raw_keywords
-    }
+    if not search_result:
+        context = {
+            "not_found": True,
+            "keyword": raw_keywords
+        }
+    else:
+        context = {
+            "data": data,
+            "nav_bar": nav_bar,
+            "page": page,
+            "keyword": raw_keywords
+        }
 
     return render(request, 'search.html', context)
