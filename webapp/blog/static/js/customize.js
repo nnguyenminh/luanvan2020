@@ -1,13 +1,21 @@
-$("#post-comment").on("submit", function (e) {
-    var dataString = $(this).serialize();
+$("#post_comment").on("submit", function (e) {
+    var post_id = document.getElementById("post_id").innerText
+    var author = $(this).children().find("#name").val()
+    var content = $(this).children().find("#message").val()
+    console.log(author)
+    console.log(content)
+    var dataString = '{ "post_id":"'+post_id+'",'+
+                        '"author":"'+author+'",'+
+                        '"content":"'+content+'"'+
+                      '}'
+    console.log(dataString)
 
     $.ajax({
       type: "POST",
       url: "/blog/post_comment",
+      contentType: 'application/json',
       data: dataString,
       success: function () {
-        var author = $('#name').val();
-        var content = $('#message').val();
         $('.comment-list').append(
             '<li class="comment">'+
                 '<div class="vcard bio">'+
@@ -21,8 +29,6 @@ $("#post-comment").on("submit", function (e) {
                 '</div>'+
             '</li>');
       }
-
-
     });
 
     e.preventDefault();

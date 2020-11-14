@@ -17,6 +17,7 @@ MAX_SEARCH_RESULT = 10
 # Create your views here.
 
 def post_comment(request):
+    print(request.body)
     return render(request, 'blog.html')
 
 

@@ -8,6 +8,7 @@
                 <p class="mb-5">
                     <img src=" {% static 'images/image_1.jpg' %} " alt="" class="img-fluid">
                 </p>
+                <p id="post_id" hidden>{{ post.id }}</p>
                 <h2>{{post.title}}</h2>
                 {{post.content|safe|linebreaks}}
                 {{post.comment.name}}
@@ -33,6 +34,7 @@
                     <ul class="comment-list">
                         {% for parent in post.comments %}
                         <li class="comment">
+                            <p id="comment_group_id">{{ parent.id }}</p>
                             <div class="vcard bio">
                                 <img src=" {% static 'images/person_1.jpg' %} " alt="Image placeholder">
                             </div>
@@ -66,7 +68,7 @@
                     <!-- END comment-list -->
                     <div class="comment-form-wrap pt-5">
                         <h3 class="mb-5">Leave a comment</h3>
-                        <form id="post-comment" action="" class="p-5 bg-light">
+                        <form id="post_comment" action="" class="p-5 bg-light">
                             <div class="form-group">
                                 <label for="name">Name *</label>
                                 <input type="text" class="form-control" id="name" required>
