@@ -29,7 +29,7 @@
                         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus itaque, autem necessitatibus voluptate quod mollitia delectus aut, sunt placeat nam vero culpa sapiente consectetur similique, inventore eos fugit cupiditate numquam!</p>
                     </div>
                 </div>
-                <div class="pt-5 mt-5">
+                <div class="pt-5 mt-5" id="commentContainer">
                     <h3 class="mb-5">{{ post.comments_count }} Comments</h3>
                     <ul class="comment-list" id="fatherfather">
                         <!-- {% for parent in post.comments %} -->
@@ -66,10 +66,10 @@
                         <!-- {% endfor %} -->
                     </ul>
                     <!-- END comment-list -->
-                    <button id="viewMoreComment" class="btn-primary" onclick="loadComment()">View more comments</button>
-                    <div class="comment-form-wrap pt-5">
-                        <h3 class="mb-5">Leave a comment</h3>
-                        <form id="post_comment" action="" class="p-5 bg-light">
+                    <button id="viewMoreComment" class="btn" onclick="loadComment()">View more comments</button>                    
+                    <div class="comment-form-wrap pt-5" id="leaveComment">
+                        <button class="btn" data-toggle="collapse" data-target="#post_comment" ><h3>Leave a comment</h3></button>
+                        <form id="post_comment" class="p-5 bg-light collapse">
                             <div class="form-group">
                                 <label for="name">Name *</label>
                                 <input type="text" class="form-control" id="name" required>

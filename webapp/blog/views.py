@@ -25,7 +25,6 @@ def load_comments(request,id):
     children = {}
     comments = []
     query_comments = post.comments.all().order_by('created_at').values()
-    comments_count = len(comments)
 
     for comment in query_comments:
         comment["created_at"] = format_datetime(comment["created_at"])
