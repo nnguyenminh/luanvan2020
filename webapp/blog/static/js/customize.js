@@ -1,67 +1,58 @@
-$("#post_comment").on("submit", function (e) {
+$("#post_comment").on("submit", function(e) {
     var post_id = document.getElementById("post_id").innerText
     var author = $(this).children().find("#name").val()
     var content = $(this).children().find("#message").val()
     console.log(author)
     console.log(content)
-    var dataString = '{ "post_id":"'+post_id+'",'+
-                        '"author":"'+author+'",'+
-                        '"content":"'+content+'"'+
-                      '}'
+    var dataString = '{ "post_id":"' + post_id + '",' +
+        '"author":"' + author + '",' +
+        '"content":"' + content + '"' +
+        '}'
     console.log(dataString)
 
     $.ajax({
-      type: "POST",
-      url: "/blog/post_comment",
-      contentType: 'application/json',
-      data: dataString,
-      success: function () {
-        $('.comment-list').append(
-            '<li class="comment">'+
-                '<div class="vcard bio">'+
-                    '<img src="/static/images/person_1.jpg" alt="Image placeholder">'+
-                '</div>'+
-                '<div class="comment-body">'+
-                    '<h3>'+author+'</h3>'+
-                    '<div class="meta mb-3">'+getNow()+'</div>'+
-                    '<p>'+content+'</p>'+
-                    '<p><a href="#" class="reply">Reply</a></p>'+
-                '</div>'+
-            '</li>');
-      }
-    });
+        type: "POST",
+        url: "/blog/post_comment",
+        contentType: 'application/json',
+        data: dataString,
+        success: function(dataserver) {
+            var x = document.getElementById('fatherfather').innerHTML;
+            var comment = "<li class='comment'><p id='comment_group_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + dataserver.created_at + "</div><p>" + dataserver.content + "</p><p><a href='#' class='reply'>Reply</a></p></div></li>";
+            x = comment + x;
+            document.getElementById("fatherfather").innerHTML = x;
+            $('#post_comment #message').val('');
+        }
+    })
+
 
     e.preventDefault();
 });
 
 
-$(function () {
+$(function() {
     $.ajaxSetup({
         headers: { "X-CSRFToken": getCookie("csrftoken") }
     });
 });
 
 
-function getCookie(c_name)
-{
-    if (document.cookie.length > 0)
-    {
+function getCookie(c_name) {
+    if (document.cookie.length > 0) {
         c_start = document.cookie.indexOf(c_name + "=");
-        if (c_start != -1)
-        {
+        if (c_start != -1) {
             c_start = c_start + c_name.length + 1;
             c_end = document.cookie.indexOf(";", c_start);
             if (c_end == -1) c_end = document.cookie.length;
-            return unescape(document.cookie.substring(c_start,c_end));
+            return unescape(document.cookie.substring(c_start, c_end));
         }
     }
     return "";
- }
+}
 
 function getNow() {
     var d = new Date();
 
-    var month = Intl.DateTimeFormat('en-US', {month: 'long'}).format(d).slice(0,3);
+    var month = Intl.DateTimeFormat('en-US', { month: 'long' }).format(d).slice(0, 3);
     var date = d.getUTCDate();
     var year = d.getUTCFullYear();
     var hour = d.getUTCHours();
@@ -85,30 +76,131 @@ function getNow() {
 
 var reply_state = false;
 
-$(".reply").on("click", function (e) {
-    if ($("#comment-popup").length) {
-        if($(this).closest("ul div.comment-popup")) {
-            alert("yes")
+$(document).on("click", ".reply", function(e) {
+    
+    $(this).parent().parent().append(
+            '<div id="comment-popup" class="comment-form-wrap pt-5">' +
+            '<h3 class="mb-5">Leave a comment</h3>' +
+            '<form id="post-comment" action="" class="p-5 bg-light">' +
+            '<div class="form-group">' +
+            '<label for="name">Name *</label>' +
+            '<input type="text" class="form-control" id="name" required>' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label for="message">Message *</label>' +
+            '<textarea name="" id="message" cols="30" rows="10" class="form-control" required></textarea>' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<input type="submit" value="Post Comment" class="btn py-3 px-4 btn-primary">' +
+            '</div>' +
+            '</form>' +
+            '</div>');
+
+    e.preventDefault();
+});
+
+
+// [
+//     {
+//         id
+//         author
+//         content
+//         post_id
+//         group: 0
+//         parent: null
+//         children: [
+//             {
+//                 id
+//                 post_id
+//                 parent
+//                 group
+//                 author
+//                 content
+//             },
+//             {
+//                 id
+//                 post_id
+//                 parent
+//                 group
+//                 author
+//                 content
+//             }
+//         ]
+//     },
+//     {
+//         // this is another comment
+//     }
+// ]
+
+// const MAX = 9
+// var stop = MAX; //9
+// var start = stop - 9; //0
+// var a = ""
+
+var data;
+
+const sayHello = (id) => {
+    $.ajax("/blog/load_comments/post=" + id, {
+        success: function(dataserver, status, xhr) {
+            data = dataserver.reverse();
+            // var len = length(data);
+            // data.forEach((comment) => {
+            //     var li = "<li class='comment'>";
+            //     li += "<p id='comment_group_id'>" + comment.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + comment.author + "</h3><div class='meta mb-3'>" + comment.created_at + "</div><p>" + comment.content + "</p><p><a href='#' class='reply'>Reply</a></p></div>"
+            //     li += "<ul class='children'>";
+            //     comment.children.forEach((reply) => {
+            //         li += "<li class='comment'><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + reply.author + "</h3><div class='meta mb-3'>" + reply.created_at + "</div><p>" + reply.reply + "</p><p>" + reply.content + "</p><p><a href='#' class='reply'>Reply</a></p></div></li>";
+            //     })
+            //     li += "</ul></li>";
+            //     document.getElementById('fatherfather').innerHTML = li;
+            // })
+            loadComment();
         }
-//        $("#comment-popup").hide();
-    } else {
-        $(e.target).closest("ul").append(
-        '<div id="comment-popup" class="comment-form-wrap pt-5">'+
-            '<h3 class="mb-5">Leave a comment</h3>'+
-            '<form id="post-comment" action="" class="p-5 bg-light">'+
-                '<div class="form-group">'+
-                    '<label for="name">Name *</label>'+
-                    '<input type="text" class="form-control" id="name" required>'+
-                '</div>'+
-                '<div class="form-group">'+
-                    '<label for="message">Message *</label>'+
-                    '<textarea name="" id="message" cols="30" rows="10" class="form-control" required></textarea>'+
-                '</div>'+
-                '<div class="form-group">'+
-                    '<input type="submit" value="Post Comment" class="btn py-3 px-4 btn-primary">'+
-                '</div>'+
-            '</form>'+
-        '</div>');
+    })
+}
+
+var start = 0;
+var stop = 1;
+
+var loadComment = () => {
+    // alert(data.length);
+    // var max = 1;
+    // var len = document.getElementById('fatherfather').childElementCount;
+    for (start; start<data.length; start++) {
+        if (start <= stop) {
+            parent = data[start];
+            children = parent.children;
+            var li = "<li class='comment'>";
+            li += "<p id='comment_group_id' hidden>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + parent.author + "</h3><div class='meta mb-3'>" + parent.created_at + "</div><p>" + parent.content + "</p><p><button class='reply'>Reply</button></p></div>"
+            li += "<ul class='children'>";
+            for (index in children) {
+                child = children[index];
+                li += "<li class='comment'><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + child.author + "</h3><div class='meta mb-3'>" + child.created_at + "</div><p>" + child.reply + "</p><p>" + child.content + "</p><p><button class='reply'>Reply</button></p></div></li>";
+            }
+            li += "</ul></li>";
+            document.getElementById('fatherfather').innerHTML += li;
+        } else {
+            // start = stop;
+            stop += 2;
+            break;
+        }
     }
-        e.preventDefault();
-    });
+    if(start == data.length){
+        $('#viewMoreComment').remove();
+    }
+}
+
+// var commentCha = "<pid='comment_group_id'>comment.id</p><divclass='vcardbio'><imgsrc='{%static 'images/person_1.jpg' %}'alt='Imageplaceholder'></div><divclass='comment-body'><h3>comment.author</h3><divclass='metamb-3'>comment.created_at</div><p>comment.content</p><p><ahref='#'class='reply'>Reply</a></p></div>"
+
+
+// var commentCon = "<liclass='comment'><divclass='vcardbio'><imgsrc='{%static 'images/person_1.jpg' %}'alt='Imageplaceholder'></div><divclass='comment-body'><h3>reply.author</h3><divclass='metamb-3'>reply.created_at</div><p>reply.reply</p><p>reply.content</p><p><ahref='#'class='reply'>Reply</a></p></div></li>"
+
+
+
+
+
+
+$(document).ready(function() {
+    var post_id = document.getElementById("post_id").innerText;
+    sayHello(post_id);
+})

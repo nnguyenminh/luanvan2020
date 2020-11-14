@@ -6,7 +6,7 @@ from bson import ObjectId, json_util
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from blog.models import Post
+from blog.models import Post, Comment
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 
 MAX_POST = 4
@@ -16,10 +16,57 @@ MAX_SEARCH_RESULT = 10
 
 # Create your views here.
 
-def post_comment(request):
-    print(request.body)
-    return render(request, 'blog.html')
+def format_datetime(datetime):
+    return datetime.strftime("%m/%d/%Y, %H:%M:%S")
 
+def load_comments(request,id):
+    post = get_object_or_404(Post, id=int(id))
+    parents = []
+    children = {}
+    comments = []
+    query_comments = post.comments.all().order_by('created_at').values()
+    comments_count = len(comments)
+
+    for comment in query_comments:
+        comment["created_at"] = format_datetime(comment["created_at"])
+        comments.append(comment)
+
+
+
+    for comment in comments:
+        if comment["group"] == "0":
+            parents.append(comment)
+        else:
+            if comment["group"] in children.keys():
+                children[comment["group"]].append(comment)
+            else:
+                children[comment["group"]] = [comment]
+
+    for parent in parents:
+        group = str(parent['id'])
+        if group in children.keys():
+            parent["children"] = children[group]
+    return HttpResponse(json.dumps(parents), content_type='application/json')
+
+@csrf_exempt
+def post_comment(request):
+    if request.method == 'POST':
+        received_json_data = json.loads(request.body)
+        # category = received_json_data['category']
+        author = received_json_data["author"]
+        content = received_json_data["content"]
+        post_id = received_json_data["post_id"]
+        comment = Comment(post_id=post_id,
+                    author=author,
+                    content=content)
+        comment.save()
+
+        post = get_object_or_404(Post, id=int(post_id))
+        latest_comment = post.comments.all().order_by('created_at').values().last()
+        latest_comment["created_at"] = format_datetime(latest_comment["created_at"])
+
+        return HttpResponse(json.dumps(latest_comment), content_type='application/json')
+    return HttpResponseNotAllowed
 
 def add_post(request):
     if request.method == 'POST':

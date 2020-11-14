@@ -17,6 +17,7 @@
                                 <span class="subheading">{{ post.category }}</span>
                                 <h2><a href=" {% url 'post' id=post.id %} ">{{ post.title }}</a></h2>
                                 <div class="meta">
+                                    <p class="mb-0">{{ post.content }}</p>
                                     <p class="mb-0">{{ post.date }}</p>
                                 </div>
                             </div>
