@@ -1,5 +1,5 @@
 from djongo import models
-from autoslug import AutoSlugField
+# from autoslug import AutoSlugField
 from django.utils.text import slugify
 
 

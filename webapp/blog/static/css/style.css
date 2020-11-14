@@ -8533,7 +8533,7 @@ h1, h2, h3, h4, h5,
     .case .text .meta p a {
       color: rgba(0, 0, 0, 0.2); }
   .case:hover .text h2 a {
-    color: rgba(0, 0, 0, 0.5); }
+    color: rgba(255, 180, 0, 1); }
   .case:hover .text .media-social {
     opacity: 1; }
   .case:hover .text .meta p a {
