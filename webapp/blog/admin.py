@@ -5,7 +5,7 @@ from blog.models import Post, Category, Comment
 # Register your models here.
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ["title", "category", "created_at", 'publish']
+    list_display = ["title", "category", "created_at"]
 
     class Meta:
         ordering = ["title"]
@@ -21,4 +21,4 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ["post", "parent", "name", "created_at"]
+    list_display = ["post", "group", "author", "created_at"]

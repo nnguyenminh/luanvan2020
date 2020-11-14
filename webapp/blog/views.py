@@ -15,7 +15,11 @@ MAX_SEARCH_RESULT = 10
 
 
 # Create your views here.
-@csrf_exempt
+
+def post_comment(request):
+    return render(request, 'blog.html')
+
+
 def add_post(request):
     if request.method == 'POST':
         received_json_data = json.loads(request.body)
@@ -92,7 +96,6 @@ def get_recent_posts(page):
                 "category": post[index].category,
                 "title": post[index].title,
                 "content": post[index].content,
-                "comment": post[index].comments,
                 "date": post[index].created_at
             })
         else:
@@ -103,31 +106,31 @@ def get_recent_posts(page):
 def get_post(id):
     # post = Post.objects.get(_id=ObjectId(id))
     post = get_object_or_404(Post, id=int(id))
-    parent = []
+    parents = []
     children = {}
     comments = post.comments.all().order_by('created_at').values()
+    comments_count = len(comments)
     for comment in comments:
-        if not comment["parent_id"]:
-            parent.append(comment)
+        if comment["group"] == "0":
+            parents.append(comment)
         else:
-            if str(comment["parent_id"]) in children.keys():
-                p = children[str(comment["parent_id"])]
-                p.append(comment)
+            if comment["group"] in children.keys():
+                children[comment["group"]].append(comment)
             else:
-                children[str(comment["parent_id"])] = [comment]
-    #
-    # print(parent)
-    # print("======")
-    # print(children)
+                children[comment["group"]] = [comment]
 
-
+    for parent in parents:
+        group = str(parent['id'])
+        if group in children.keys():
+            parent["children"] = children[group]
 
     data = {
         "id": post.id,
         "category": post.category,
         "title": post.title,
         "content": post.content,
-        "comment": comments,
+        "comments": parents,
+        "comments_count": comments_count,
         "date": post.created_at,
     }
     return data
@@ -281,7 +284,6 @@ def search(request, page=1):
                 "category": search_result[index]["category"],
                 "title": search_result[index]["title"],
                 "content": search_result[index]["content"],
-                "comment": search_result[index]["comment"],
                 "date": search_result[index]["date"]
             })
         else:
