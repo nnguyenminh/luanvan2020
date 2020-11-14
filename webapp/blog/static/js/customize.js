@@ -1,4 +1,4 @@
-$("form").on("submit", function (e) {
+$("#post-comment").on("submit", function (e) {
     var dataString = $(this).serialize();
 
     $.ajax({
@@ -8,8 +8,6 @@ $("form").on("submit", function (e) {
       success: function () {
         var author = $('#name').val();
         var content = $('#message').val();
-        var x = $(this).val();
-        console.log(x)
         $('.comment-list').append(
             '<li class="comment">'+
                 '<div class="vcard bio">'+
