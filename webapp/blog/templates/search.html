@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% load raw %}
+{% load custom_tags %}
 {% block content %}
 <section class="ftco-section">
     {% if not_found %}
@@ -12,9 +12,9 @@
                 {% for post in data %}
                     <div class="post">
                         <a href="{% url 'post' id=post.id %}">
-                            <h1 class="post-title">{{post.title|safe}}</h1>
+                            <h1 class="post-title">{{post.title|replace_quotes|safe}}</h1>
                         </a>
-                        <p>{{ post.content|safe|linebreaks }}</p>
+                        <p>{{ post.content|replace_quotes|safe|linebreaks }}</p>
 
                     </div>
                 {%endfor%}
