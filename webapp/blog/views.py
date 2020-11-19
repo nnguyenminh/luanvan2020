@@ -5,9 +5,10 @@ import pymongo
 from bson import ObjectId, json_util
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-
+import re
 from blog.models import Post, Comment
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
+from blog.utils import escapse_symbol
 
 MAX_POST = 4
 MAX_PAGE = 3
@@ -49,23 +50,29 @@ def load_comments(request,id):
 
 @csrf_exempt
 def post_comment(request):
-    if request.method == 'POST':
-        received_json_data = json.loads(request.body)
-        # category = received_json_data['category']
-        author = received_json_data["author"]
-        content = received_json_data["content"]
-        post_id = received_json_data["post_id"]
-        comment = Comment(post_id=post_id,
-                    author=author,
-                    content=content)
-        comment.save()
+    try:
+        if request.method == 'POST':
+            print(request.body)
+            received_json_data = json.loads(request.body)
+            # category = received_json_data['category']
+            author = received_json_data["author"]
+            content = received_json_data["content"]
+            post_id = received_json_data["post_id"]
+            comment = Comment(post_id=post_id,
+                        author=author,
+                        content=content)
+            comment.save()
 
-        post = get_object_or_404(Post, id=int(post_id))
-        latest_comment = post.comments.all().order_by('created_at').values().last()
-        latest_comment["created_at"] = format_datetime(latest_comment["created_at"])
+            post = get_object_or_404(Post, id=int(post_id))
+            latest_comment = post.comments.all().order_by('created_at').values().last()
+            latest_comment["created_at"] = format_datetime(latest_comment["created_at"])
 
-        return HttpResponse(json.dumps(latest_comment), content_type='application/json')
-    return HttpResponseNotAllowed
+            return HttpResponse(json.dumps(latest_comment), content_type='application/json')
+        return HttpResponseBadRequest("Bad Request", content_type='application/json')
+    except TypeError:
+        return HttpResponseBadRequest("Bad Request", content_type='application/json')
+    except json.decoder.JSONDecodeError:
+        return HttpResponseBadRequest("Bad Request", content_type='application/json')
 
 def add_post(request):
     if request.method == 'POST':
@@ -88,7 +95,7 @@ def add_post(request):
                     comment=comment)
         post.save()
         return HttpResponse("Inserted")
-    return HttpResponseNotAllowed
+    return HttpResponseBadRequest("Bad Request", content_type='application/json')
 
 
 def update_post(request, id):
@@ -109,7 +116,7 @@ def read_post(request, id):
             "date": post.date,
         }
         return JsonResponse(data, safe=False)
-    return HttpResponseNotAllowed
+    return HttpResponseBadRequest("Bad Request", content_type='application/json')
 
 
 def read_post_all(request, page=1):
@@ -269,6 +276,7 @@ def search_in_mongo(list_keywords):
     keywords = []
     result_id = []
     result = []
+    
 
     for raw_keyword in list_keywords:
         # x = collection.find({"$text": {"$search": f'"{keyword}"'}})
@@ -276,8 +284,7 @@ def search_in_mongo(list_keywords):
         keyword = collection.find({"$text": {"$search": raw_keyword}}).explain()["queryPlanner"]["winningPlan"][
             "parsedTextQuery"]["terms"]
         if keyword:
-            keywords.append(keyword[0])
-        print(keywords)
+            keywords = keyword.copy()
         for item in search_result:
             if item not in result_id:
                 result_id.append(item['id'])
@@ -299,26 +306,36 @@ def load_dictionary():
 def add_css_highlight_background(word):
     return fr'<span style=color:red;font-weight:500;background-color:yellow>{word}</span>'
 
+def find_keyword_pos(regex, item):
+    matches = re.finditer(regex, item, re.MULTILINE | re.IGNORECASE)
+    result = []
+    for matchNum, match in enumerate(matches, start=1):
+        result.append(item[match.start():match.end()])
+    
+    return result
 
 def search(request, page=1):
     raw_request = str(request)
     raw_keywords = raw_request[raw_request.find("keyword") + 8:-2]
     list_raw_keywords = raw_keywords.split(" ")
     keywords, search_result = search_in_mongo(list_raw_keywords)
-
     dictionary = load_dictionary()
-    new_font = add_css_highlight_background
+    new_format = add_css_highlight_background
     data = []
 
     for item in search_result:
         for keyword in keywords:
             if keyword in dictionary:
                 for value in dictionary[keyword]:
-                    item['title'] = item['title'].replace(value, new_font(value))
-                    item['content'] = item['content'].replace(value, new_font(value))
+                    for word in find_keyword_pos(value, item['title']):
+                        item['title'] = item['title'].replace(word, new_format(word))
+                    for word in find_keyword_pos(value, item['content']):
+                        item['content'] = item['content'].replace(word, new_format(word))
             else:
-                item['title'] = item['title'].replace(keyword, new_font(keyword))
-                item['content'] = item['content'].replace(keyword, new_font(keyword))
+                for word in find_keyword_pos(keyword, item['title']):
+                    item['title'] = item['title'].replace(word, new_format(word))
+                for word in find_keyword_pos(keyword, item['content']):
+                    item['content'] = item['content'].replace(word, new_format(word))
     max_length = len(search_result)
 
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_SEARCH_RESULT)
