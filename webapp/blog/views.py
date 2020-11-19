@@ -8,7 +8,6 @@ from django.views.decorators.csrf import csrf_exempt
 import re
 from blog.models import Post, Comment
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
-from blog.utils import escapse_symbol
 
 MAX_POST = 4
 MAX_PAGE = 3
