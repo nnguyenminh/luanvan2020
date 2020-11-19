@@ -208,3 +208,8 @@ $(document).ready(function () {
     var post_id = document.getElementById("post_id").innerText;
     sayHello(post_id);
 })
+
+window.onload = function(){
+    var ps = document.getElementsByClassName("content");
+    for(p of ps) { p.innerHTML = p.textContent }
+}
