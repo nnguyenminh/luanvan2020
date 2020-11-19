@@ -314,7 +314,7 @@ def find_keyword_pos(regex, item):
     return result
 
 def search(request, page=1):
-    raw_request = str(request)
+    raw_request = unquote(str(request))
     raw_keywords = raw_request[raw_request.find("keyword") + 8:-2]
     list_raw_keywords = raw_keywords.split(" ")
     keywords, search_result = search_in_mongo(list_raw_keywords)
