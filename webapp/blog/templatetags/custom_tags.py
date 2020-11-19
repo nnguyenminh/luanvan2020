@@ -4,5 +4,5 @@ register = template.Library()
 
 
 @register.filter
-def raw(value):
-    return value.replace("=", "")
+def replace_quotes(value):
+    return value.replace("'", '"')

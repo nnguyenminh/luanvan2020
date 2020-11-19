@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_tags %}
 {% block content %}
 <section class="ftco-section ftco-degree-bg">
     <div class="container">
@@ -9,9 +10,8 @@
                     <img src=" {% static 'images/image_1.jpg' %} " alt="" class="img-fluid">
                 </p>
                 <p id="post_id" hidden>{{ post.id }}</p>
-                <h2>{{post.title}}</h2>
-                {{post.content|safe|linebreaks}}
-                {{post.comment.name}}
+                <h2>{{post.title|replace_quotes}}</h2>
+                {{post.content|replace_quotes|safe|linebreaks}}
                 <div class="tag-widget post-tag-container mb-5 mt-5">
                     <div class="tagcloud">
                         <a href="#" class="tag-cloud-link">Life</a>
@@ -31,7 +31,7 @@
                 </div>
                 <div class="pt-5 mt-5" id="commentContainer">
                     <h3 class="mb-5">{{ post.comments_count }} Comments</h3>
-                    <ul class="comment-list" id="fatherfather">
+                    <ul class="comment-list" id="commentList">
                         <!-- {% for parent in post.comments %} -->
                         <!-- <li class="comment" id="father"> -->
                            <!--  <p id="comment_group_id">{{ parent.id }}</p>

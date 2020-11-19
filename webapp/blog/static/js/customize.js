@@ -3,8 +3,8 @@ $("#post_comment").on("submit", function (e) {
     var author = $(this).find("#name").val();
     var content = $(this).find("#message").val();
     var dataString = '{ "post_id":"' + post_id + '",' +
-        '"author":"' + author + '",' +
-        '"content":"' + content + '"' +
+        '"author":"' + standardize_request(author) + '",' +
+        '"content":"' + standardize_request(content) + '"' +
         '}';
 
     $.ajax({
@@ -13,10 +13,10 @@ $("#post_comment").on("submit", function (e) {
         contentType: 'application/json',
         data: dataString,
         success: function (dataserver) {
-            var x = document.getElementById('fatherfather').innerHTML;
+            var x = document.getElementById('commentList').innerHTML;
             var comment = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + dataserver.created_at + "</div><p>" + dataserver.content + "</p><p><button class='reply'>Reply</button></p></div></li>";
             x = comment + x;
-            document.getElementById("fatherfather").innerHTML = x;
+            document.getElementById("commentList").innerHTML = x;
             $('#post_comment #message').val('');
         }
     });
@@ -25,15 +25,15 @@ $("#post_comment").on("submit", function (e) {
     e.preventDefault();
 });
 
-$("#popup_comment").on("submit", function (e) {
-    console.log("yes")
-    var post_id = document.getElementById("post_id").innerText
-    var author = $(this).find("#name").val();
-    var content = $(this).find("#message").val();
-    console.log(author);
-    console.log(content);
-    e.preventDefault();
-});
+// $("#popup_comment").on("submit", function (e) {
+//     console.log("yes")
+//     var post_id = document.getElementById("post_id").innerText
+//     var author = $(this).find("#name").val();
+//     var content = $(this).find("#message").val();
+//     console.log(author);
+//     console.log(content);
+//     e.preventDefault();
+// });
     // var dataString = '{ "post_id":"' + post_id + '",' +
     //     '"author":"' + author + '",' +
     //     '"content":"' + content + '"' +
@@ -46,10 +46,10 @@ $("#popup_comment").on("submit", function (e) {
     //     contentType: 'application/json',
     //     data: dataString,
     //     success: function (dataserver) {
-    //         var x = document.getElementById('fatherfather').innerHTML;
+    //         var x = document.getElementById('commentList').innerHTML;
     //         var comment = "<li class='comment'><p id='comment_group_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + dataserver.created_at + "</div><p>" + dataserver.content + "</p><p><a href='#' class='reply'>Reply</a></p></div></li>";
     //         x = comment + x;
-    //         document.getElementById("fatherfather").innerHTML = x;
+    //         document.getElementById("commentList").innerHTML = x;
     //         $('#post_comment #message').val('');
     //     }
     // })
@@ -102,7 +102,6 @@ function getNow() {
     return render_date
 }
 
-var reply_state = false;
 
 $(document).on("click", ".reply", function (e) {
 
@@ -151,7 +150,7 @@ const sayHello = (id) => {
             //         li += "<li class='comment'><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + reply.author + "</h3><div class='meta mb-3'>" + reply.created_at + "</div><p>" + reply.reply + "</p><p>" + reply.content + "</p><p><a href='#' class='reply'>Reply</a></p></div></li>";
             //     })
             //     li += "</ul></li>";
-            //     document.getElementById('fatherfather').innerHTML = li;
+            //     document.getElementById('commentList').innerHTML = li;
             // })
             loadComment();
         }
@@ -164,20 +163,20 @@ var stop = 1;
 var loadComment = () => {
     // alert(data.length);
     // var max = 1;
-    // var len = document.getElementById('fatherfather').childElementCount;
+    // var len = document.getElementById('commentList').childElementCount;
     for (start; start < data.length; start++) {
         if (start <= stop) {
             parent = data[start];
             children = parent.children;
             var li = "<li class='comment'>";
-            li += "<p id='comment_id'>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + parent.author + "</h3><div class='meta mb-3'>" + parent.created_at + "</div><p>" + parent.content + "</p><p><button class='reply'>Reply</button></p></div>"
+            li += "<p id='comment_id'>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(parent.author) + "</h3><div class='meta mb-3'>" + parent.created_at + "</div><p>" + replace_quotes(parent.content) + "</p><p><button class='reply'>Reply</button></p></div>"
             li += "<ul class='children'>";
             for (index in children) {
                 child = children[index];
-                li += "<li class='comment'><p id='comment_id'>" + child.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + child.author + "</h3><div class='meta mb-3'>" + child.created_at + "</div><p>" + child.reply + "</p><p>" + child.content + "</p><p><button class='reply'>Reply</button></p></div></li>";
+                li += "<li class='comment'><p id='comment_id'>" + child.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(child.author) + "</h3><div class='meta mb-3'>" + child.created_at + "</div><p>" + replace_quotes(child.reply) + "</p><p>" + replace_quotes(child.content) + "</p><p><button class='reply'>Reply</button></p></div></li>";
             }
             li += "</ul></li>";
-            document.getElementById('fatherfather').innerHTML += li;
+            document.getElementById('commentList').innerHTML += li;
         } else {
             // start = stop;
             stop += 2;
@@ -194,8 +193,14 @@ var loadComment = () => {
 
 // var commentCon = "<liclass='comment'><divclass='vcardbio'><imgsrc='{%static 'images/person_1.jpg' %}'alt='Imageplaceholder'></div><divclass='comment-body'><h3>reply.author</h3><divclass='metamb-3'>reply.created_at</div><p>reply.reply</p><p>reply.content</p><p><ahref='#'class='reply'>Reply</a></p></div></li>"
 
+function replace_quotes(raw_string) {
+    result = raw_string.replaceAll("'",'"');
+    return result;    
+}
 
-
+function standardize_request(raw_string) {
+    return raw_string.replaceAll('"',"'").replaceAll("\\","\\\\")
+}
 
 
 

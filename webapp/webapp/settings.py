@@ -68,7 +68,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'builtins': [
-                'blog.templatetags.raw'
+                'blog.templatetags.custom_tags'
             ]
         },
     },
