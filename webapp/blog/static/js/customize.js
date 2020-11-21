@@ -188,20 +188,28 @@ var loadComment = () => {
 function render_group_comment(parent) {
     children = parent.children;
     var li = "<li class='comment'>";
-    li += "<p id='comment_id'>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(parent.author) + "</h3><div class='meta mb-3'>" + parent.created_at + add_flag(parent.flag) + "</div><p>" + replace_quotes(parent.content) + "</p><p><button class='reply'>Reply</button></p></div>"
+    li += "<p id='comment_id'>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(parent.author) + "</h3><div class='meta mb-3'>" + format_date(parent.created_at) + add_flag(parent.flag) + "</div><p>" + replace_quotes(parent.content) + "</p><p><button class='reply'>Reply</button></p></div>"
     li += "<ul class='children'>";
     for (index in children) {
         child = children[index];
-        li += "<li class='comment'><p id='comment_id'>" + child.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(child.author) + "</h3><div class='meta mb-3'>" + child.created_at + "</div><p>" + replace_quotes(child.reply) + "</p><p>" + replace_quotes(child.content) + "</p><p><button class='reply'>Reply</button></p></div></li>";
+        li += "<li class='comment'><p id='comment_id'>" + child.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(child.author) + "</h3><div class='meta mb-3'>" + format_date(child.created_at) + "</div><p>" + replace_quotes(child.reply) + "</p><p>" + replace_quotes(child.content) + "</p><p><button class='reply'>Reply</button></p></div></li>";
     }
     li += "</ul></li>";
     return li
 }
 
+function format_date(date) {
+    return date.month + ". " + date.day + ", " + date.year + ", " + date.hour + ":" + date.minute + " " + date["AM-PM"]
+    // return Nov. 17, 2020, 2:47 p.m.
+}
+
 function add_flag(is_flagged) {
     if (is_flagged){
         return '<i style="position: relative; left:10px; color: red;" class="fas fa-flag"></i>'
-    }    
+    }
+    else {
+        return ""
+    }
 }
 
 function replace_quotes(raw_string) {

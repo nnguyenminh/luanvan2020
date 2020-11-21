@@ -9,7 +9,8 @@ import re
 from blog.models import Post, Comment, Category
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
 
-MAX_POST = 4
+MAX_POST_HOME_PAGE = 4
+MAX_POST_CATEGORY_PAGE = 4
 MAX_PAGE = 3
 MAX_SEARCH_RESULT = 10
 
@@ -17,7 +18,16 @@ MAX_SEARCH_RESULT = 10
 # Create your views here.
 
 def format_datetime(datetime):
-    return datetime.strftime("%m/%d/%Y, %H:%M:%S")
+    date = {}
+    date["day"] = datetime.strftime("%d")
+    date["month"] = datetime.strftime("%b")
+    date["year"] = datetime.strftime("%Y")
+    date["hour"] = datetime.strftime("%I")
+    date["minute"] = datetime.strftime("%M")
+    date["second"] = datetime.strftime("%S")
+    date["AM-PM"] = "a.m." if datetime.strftime("%p") == "AM" else "p.m."
+    print(date)
+    return date
 
 def load_comments(request,id):
     post = get_object_or_404(Post, id=int(id))
@@ -47,6 +57,7 @@ def load_comments(request,id):
         group = str(parent['id'])
         if group in children.keys():
             parent["children"] = children[group]
+    
     return HttpResponse(json.dumps(parents), content_type='application/json')
 
 @csrf_exempt
@@ -123,8 +134,8 @@ def read_post(request, id):
 def read_post_all(request, page=1):
     post = Post.objects.all().order_by('date')
     data = []
-    for i in range(MAX_POST):
-        index = i + (page - 1) * MAX_POST
+    for i in range(MAX_POST_HOME_PAGE):
+        index = i + (page - 1) * MAX_POST_HOME_PAGE
         data.append({
             "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
             # "category": post[index].category,
@@ -140,8 +151,8 @@ def get_recent_posts(page):
     post = Post.objects.all().order_by('created_at').reverse()
     max_length = len(post)
     data = []
-    for i in range(MAX_POST):
-        index = i + (page - 1) * MAX_POST
+    for i in range(MAX_POST_HOME_PAGE):
+        index = i + (page - 1) * MAX_POST_HOME_PAGE
         if index < max_length:
             if len(post[index].title) > 40:
                 post[index].title = post[index].title[:27] + '...'
@@ -226,7 +237,7 @@ def modify_bottom_nav_bar(max_length, page, MAX):
 
 def home(request, page=1):
     data, max_length = get_recent_posts(page)
-    nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST)
+    nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST_HOME_PAGE)
     context = {
         "data": data,
         "nav_bar": nav_bar,
@@ -268,11 +279,37 @@ def find_category(regex):
         if re.search(regex, category, re.IGNORECASE):
             return category
 
-def category(request, cat):
+def category(request, cat, page=1):
     
     post = Category.objects.get(name=find_category(cat)).posts.all()
-    print(post)
-    return render(request, f'{cat}.html')
+    max_length = len(post)
+    data = []
+    for i in range(MAX_POST_CATEGORY_PAGE):
+        index = i + (page - 1) * MAX_POST_CATEGORY_PAGE
+        if index < max_length:
+            if len(post[index].title) > 40:
+                post[index].title = post[index].title[:27] + '...'
+            data.append({
+                # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
+                "id": post[index].id,
+                "category": post[index].category,
+                "title": post[index].title,
+                "content": post[index].content,
+                "date": format_datetime(post[index].created_at)
+            })
+        else:
+            break
+
+    nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST_CATEGORY_PAGE)
+
+    context = {
+        "data": data,
+        "nav_bar": nav_bar,
+        "page": page,
+    }
+
+    print(data)
+    return render(request, f'{cat}.html', context)
 
 
 def search_in_mongo(list_keywords):
@@ -348,7 +385,7 @@ def search(request, page=1):
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_SEARCH_RESULT)
 
     for i in range(MAX_SEARCH_RESULT):
-        index = i + (page - 1) * MAX_POST
+        index = i + (page - 1) * MAX_POST_HOME_PAGE
         if index < max_length:
             data.append({
                 "id": search_result[index]["id"],
