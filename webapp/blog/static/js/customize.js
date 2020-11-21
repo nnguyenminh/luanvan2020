@@ -1,4 +1,4 @@
-$("#post_comment").on("submit", function (e) {
+$("#leaveCommentForm").on("submit", function (e) {
     var post_id = document.getElementById("post_id").innerText;
     var author = $(this).find("#name").val();
     var content = $(this).find("#message").val();
@@ -17,7 +17,7 @@ $("#post_comment").on("submit", function (e) {
             var comment = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + dataserver.created_at + "</div><p>" + dataserver.content + "</p><p><button class='reply'>Reply</button></p></div></li>";
             x = comment + x;
             document.getElementById("commentList").innerHTML = x;
-            $('#post_comment #message').val('');
+            $('#leaveCommentForm #message').val('');
         }
     });
 
@@ -25,7 +25,7 @@ $("#post_comment").on("submit", function (e) {
     e.preventDefault();
 });
 
-// $("#popup_comment").on("submit", function (e) {
+// $("#replyCommentForm").on("submit", function (e) {
 //     console.log("yes")
 //     var post_id = document.getElementById("post_id").innerText
 //     var author = $(this).find("#name").val();
@@ -50,7 +50,7 @@ $("#post_comment").on("submit", function (e) {
     //         var comment = "<li class='comment'><p id='comment_group_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + dataserver.created_at + "</div><p>" + dataserver.content + "</p><p><a href='#' class='reply'>Reply</a></p></div></li>";
     //         x = comment + x;
     //         document.getElementById("commentList").innerHTML = x;
-    //         $('#post_comment #message').val('');
+    //         $('#leaveCommentForm #message').val('');
     //     }
     // })
 
@@ -105,11 +105,11 @@ function getNow() {
 
 $(document).on("click", ".reply", function (e) {
 
-    $("#popup_comment").remove();
+    $("#replyComment").remove();
 
     $(this).parent().parent().append(
-        '<div class="comment-form-wrap pt-5">' +
-        '<form id="popup_comment" class="p-5 bg-light">' +
+        '<div class="comment-form-wrap pt-5" id="replyComment">' +
+        '<form id="replyCommentForm" class="p-5 bg-light">' +
         '<div class="form-group">' +
         '<label for="name">Name *</label>' +
         '<input type="text" class="form-control" id="name" required>' +
@@ -128,8 +128,8 @@ $(document).on("click", ".reply", function (e) {
     e.preventDefault();
 });
 
-$(document).on('click', '#popup_comment button', function () {
-    $("#popup_comment").remove();
+$(document).on('click', '#replyCommentForm button', function () {
+    $("#replyCommentForm").remove();
 
 })
 
@@ -137,7 +137,7 @@ $(document).on('click', '#popup_comment button', function () {
 
 var data;
 
-const sayHello = (id) => {
+const preload_comments = (id) => {
     $.ajax("/blog/load_comments/post=" + id, {
         success: function (dataserver, status, xhr) {
             data = dataserver.reverse();
@@ -167,16 +167,8 @@ var loadComment = () => {
     for (start; start < data.length; start++) {
         if (start <= stop) {
             parent = data[start];
-            children = parent.children;
-            var li = "<li class='comment'>";
-            li += "<p id='comment_id'>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(parent.author) + "</h3><div class='meta mb-3'>" + parent.created_at + "</div><p>" + replace_quotes(parent.content) + "</p><p><button class='reply'>Reply</button></p></div>"
-            li += "<ul class='children'>";
-            for (index in children) {
-                child = children[index];
-                li += "<li class='comment'><p id='comment_id'>" + child.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(child.author) + "</h3><div class='meta mb-3'>" + child.created_at + "</div><p>" + replace_quotes(child.reply) + "</p><p>" + replace_quotes(child.content) + "</p><p><button class='reply'>Reply</button></p></div></li>";
-            }
-            li += "</ul></li>";
-            document.getElementById('commentList').innerHTML += li;
+            
+            document.getElementById('commentList').innerHTML += render_group_comment(parent);
         } else {
             // start = stop;
             stop += 2;
@@ -193,6 +185,25 @@ var loadComment = () => {
 
 // var commentCon = "<liclass='comment'><divclass='vcardbio'><imgsrc='{%static 'images/person_1.jpg' %}'alt='Imageplaceholder'></div><divclass='comment-body'><h3>reply.author</h3><divclass='metamb-3'>reply.created_at</div><p>reply.reply</p><p>reply.content</p><p><ahref='#'class='reply'>Reply</a></p></div></li>"
 
+function render_group_comment(parent) {
+    children = parent.children;
+    var li = "<li class='comment'>";
+    li += "<p id='comment_id'>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(parent.author) + "</h3><div class='meta mb-3'>" + parent.created_at + add_flag(parent.flag) + "</div><p>" + replace_quotes(parent.content) + "</p><p><button class='reply'>Reply</button></p></div>"
+    li += "<ul class='children'>";
+    for (index in children) {
+        child = children[index];
+        li += "<li class='comment'><p id='comment_id'>" + child.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(child.author) + "</h3><div class='meta mb-3'>" + child.created_at + "</div><p>" + replace_quotes(child.reply) + "</p><p>" + replace_quotes(child.content) + "</p><p><button class='reply'>Reply</button></p></div></li>";
+    }
+    li += "</ul></li>";
+    return li
+}
+
+function add_flag(is_flagged) {
+    if (is_flagged){
+        return '<i style="position: relative; left:10px; color: red;" class="fas fa-flag"></i>'
+    }    
+}
+
 function replace_quotes(raw_string) {
     result = raw_string.replaceAll("'",'"');
     return result;    
@@ -206,7 +217,7 @@ function standardize_request(raw_string) {
 
 $(document).ready(function () {
     var post_id = document.getElementById("post_id").innerText;
-    sayHello(post_id);
+    preload_comments(post_id);
 })
 
 window.onload = function(){

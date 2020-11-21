@@ -47,6 +47,8 @@ class Comment(models.Model):
     author = models.CharField(max_length=50)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    hidden = models.BooleanField(default=False)
+    flag = models.BooleanField(default=False)
 
     group = models.SlugField(
         default='',

@@ -27,6 +27,8 @@ def load_comments(request,id):
     query_comments = post.comments.all().order_by('created_at').values()
 
     for comment in query_comments:
+        if comment["hidden"]:
+            continue
         comment["created_at"] = format_datetime(comment["created_at"])
         comments.append(comment)
 
