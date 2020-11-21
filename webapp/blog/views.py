@@ -6,7 +6,7 @@ from bson import ObjectId, json_util
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 import re
-from blog.models import Post, Comment
+from blog.models import Post, Comment, Category
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
 
 MAX_POST = 4
@@ -137,7 +137,7 @@ def read_post_all(request, page=1):
 
 
 def get_recent_posts(page):
-    post = Post.objects.all().order_by('created_at')
+    post = Post.objects.all().order_by('created_at').reverse()
     max_length = len(post)
     data = []
     for i in range(MAX_POST):
@@ -262,11 +262,17 @@ def post(request, id):
     return render(request, 'post.html', context)
 
 
+def find_category(regex):
+    categories = ["Technology", "Tutorials", "Design"]
+    for category in categories:
+        if re.search(regex, category, re.IGNORECASE):
+            return category
+
 def category(request, cat):
-    context = {
-        "nav_tab": cat
-    }
-    return render(request, f'{cat}.html', context)
+    
+    post = Category.objects.get(name=find_category(cat)).posts.all()
+    print(post)
+    return render(request, f'{cat}.html')
 
 
 def search_in_mongo(list_keywords):
