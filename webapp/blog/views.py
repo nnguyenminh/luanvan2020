@@ -71,8 +71,15 @@ def post_comment(request):
             content = received_json_data["content"]
             post_id = received_json_data["post_id"]
             comment = Comment(post_id=post_id,
-                        author=author,
-                        content=content)
+                    author=author,
+                    content=content)
+            if hasattr(received_json_data, 'parent_id'):
+                parent_id = received_json_data["parent_id"]
+                comment = Comment(
+                    post_id=post_id,
+                    author=author,
+                    content=content,
+                    parent_id=parent_id)
             comment.save()
 
             post = get_object_or_404(Post, id=int(post_id))
@@ -274,7 +281,7 @@ def post(request, id):
 
 
 def find_category(regex):
-    categories = ["Technology", "Tutorials", "Design"]
+    categories = ["technology", "tutorial", "design"]
     for category in categories:
         if re.search(regex, category, re.IGNORECASE):
             return category

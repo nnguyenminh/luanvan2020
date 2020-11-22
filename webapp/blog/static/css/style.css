@@ -9263,3 +9263,24 @@ textarea.form-control {
   100% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -136px; } }
+
+a.replycm {
+  color: #000000 !important;
+  text-decoration: underline !important;
+}
+a.replycm:hover {
+  color: #727b88;
+  cursor: pointer;
+}
+
+#replyCommentForm div.form-group div.col input[type="text"]{
+  height: 40px !important;
+}
+
+#replyCommentForm div.form-group input:nth-of-type(1):hover {
+    background: #ecb121 !important;
+}
+#replyCommentForm div.form-group button:nth-of-type(1):hover {
+    color: #8e6603 !important;
+    text-decoration: underline;
+}

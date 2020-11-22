@@ -8,6 +8,7 @@
 	<script type="text/javascript">
 		var content = "<p>asdas</p>";
 		document.body.innerHTML = content
+
 	</script>
 	<ul class="a" id="1">
 		<li>
@@ -33,5 +34,12 @@
 			</ul>
 		</li>
 	</ul>
+	<a href="" class="replycm">Reply</a>
+	<script>
+		document.getElementsByClassName("replycm")[0].addEventListener("click",function(e){
+			alert("clicked");
+			e.preventDefault();
+		})
+	</script>
 </body>
 </html>
