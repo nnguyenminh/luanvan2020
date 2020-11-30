@@ -7,7 +7,12 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 import re
 from blog.models import Post, Comment, Category
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed, HttpResponseBadRequest
+from django.http import (
+    HttpResponse,
+    JsonResponse,
+    HttpResponseNotAllowed,
+    HttpResponseBadRequest,
+)
 
 MAX_POST_HOME_PAGE = 4
 MAX_POST_CATEGORY_PAGE = 4
@@ -16,6 +21,7 @@ MAX_SEARCH_RESULT = 10
 
 
 # Create your views here.
+
 
 def format_datetime(datetime):
     date = {}
@@ -26,23 +32,21 @@ def format_datetime(datetime):
     date["minute"] = datetime.strftime("%M")
     date["second"] = datetime.strftime("%S")
     date["AM-PM"] = "a.m." if datetime.strftime("%p") == "AM" else "p.m."
-    print(date)
     return date
 
-def load_comments(request,id):
+
+def load_comments(request, id):
     post = get_object_or_404(Post, id=int(id))
     parents = []
     children = {}
     comments = []
-    query_comments = post.comments.all().order_by('created_at').values()
+    query_comments = post.comments.all().order_by("created_at").values()
 
     for comment in query_comments:
         if comment["hidden"]:
             continue
         comment["created_at"] = format_datetime(comment["created_at"])
         comments.append(comment)
-
-
 
     for comment in comments:
         if comment["group"] == "0":
@@ -54,47 +58,51 @@ def load_comments(request,id):
                 children[comment["group"]] = [comment]
 
     for parent in parents:
-        group = str(parent['id'])
+        group = str(parent["id"])
         if group in children.keys():
             parent["children"] = children[group]
-    
-    return HttpResponse(json.dumps(parents), content_type='application/json')
+
+    return HttpResponse(json.dumps(parents), content_type="application/json")
+
 
 @csrf_exempt
 def post_comment(request):
     try:
-        if request.method == 'POST':
+        if request.method == "POST":
             print(request.body)
             received_json_data = json.loads(request.body)
             # category = received_json_data['category']
             author = received_json_data["author"]
             content = received_json_data["content"]
             post_id = received_json_data["post_id"]
-            comment = Comment(post_id=post_id,
-                    author=author,
-                    content=content)
-            if hasattr(received_json_data, 'parent_id'):
+
+            if received_json_data["parent_id"]:
+                print("yes")
                 parent_id = received_json_data["parent_id"]
                 comment = Comment(
-                    post_id=post_id,
-                    author=author,
-                    content=content,
-                    parent_id=parent_id)
+                    post_id=post_id, author=author, content=content, parent_id=parent_id
+                )
+            else:
+                comment = Comment(post_id=post_id, author=author, content=content)
+
             comment.save()
 
             post = get_object_or_404(Post, id=int(post_id))
-            latest_comment = post.comments.all().order_by('created_at').values().last()
+            latest_comment = post.comments.all().order_by("created_at").values().last()
             latest_comment["created_at"] = format_datetime(latest_comment["created_at"])
 
-            return HttpResponse(json.dumps(latest_comment), content_type='application/json')
-        return HttpResponseBadRequest("Bad Request", content_type='application/json')
+            return HttpResponse(
+                json.dumps(latest_comment), content_type="application/json"
+            )
+        return HttpResponseBadRequest("Bad Request", content_type="application/json")
     except TypeError:
-        return HttpResponseBadRequest("Bad Request", content_type='application/json')
+        return HttpResponseBadRequest("Bad Request", content_type="application/json")
     except json.decoder.JSONDecodeError:
-        return HttpResponseBadRequest("Bad Request", content_type='application/json')
+        return HttpResponseBadRequest("Bad Request", content_type="application/json")
+
 
 def add_post(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         received_json_data = json.loads(request.body)
         # category = received_json_data['category']
         title = received_json_data["title"]
@@ -108,13 +116,10 @@ def add_post(request):
         #     "first_name": received_json_data["author_details"]["first_name"],
         #     "last_name": received_json_data["author_details"]["last_name"]
         # }
-        post = Post(category=category,
-                    title=title,
-                    content=content,
-                    comment=comment)
+        post = Post(category=category, title=title, content=content, comment=comment)
         post.save()
         return HttpResponse("Inserted")
-    return HttpResponseBadRequest("Bad Request", content_type='application/json')
+    return HttpResponseBadRequest("Bad Request", content_type="application/json")
 
 
 def update_post(request, id):
@@ -126,7 +131,7 @@ def delete_post(request, id):
 
 
 def read_post(request, id):
-    if request.method == 'GET':
+    if request.method == "GET":
         post = Post.objects.get(_id=ObjectId(id))
         data = {
             "title": post.title,
@@ -135,42 +140,53 @@ def read_post(request, id):
             "date": post.date,
         }
         return JsonResponse(data, safe=False)
-    return HttpResponseBadRequest("Bad Request", content_type='application/json')
+    return HttpResponseBadRequest("Bad Request", content_type="application/json")
 
 
 def read_post_all(request, page=1):
-    post = Post.objects.all().order_by('date')
+    post = Post.objects.all().order_by("date")
     data = []
     for i in range(MAX_POST_HOME_PAGE):
         index = i + (page - 1) * MAX_POST_HOME_PAGE
-        data.append({
-            "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
-            # "category": post[index].category,
-            "title": post[index].title,
-            "content": post[index].content,
-            "comment": post[index].comment,
-            "date": post[index].date})
+        data.append(
+            {
+                "id": json.loads(
+                    json.dumps(post[index]._id, default=json_util.default)
+                )["$oid"],
+                # "category": post[index].category,
+                "title": post[index].title,
+                "content": post[index].content,
+                "comment": post[index].comment,
+                "date": post[index].date,
+            }
+        )
         print(json.dumps(post[index]._id, default=json_util.default))
     return JsonResponse(data, safe=False)
 
 
 def get_recent_posts(page):
-    post = Post.objects.all().order_by('created_at').reverse()
+    post = Post.objects.all().order_by("created_at").reverse()
     max_length = len(post)
     data = []
     for i in range(MAX_POST_HOME_PAGE):
         index = i + (page - 1) * MAX_POST_HOME_PAGE
         if index < max_length:
-            if len(post[index].title) > 40:
-                post[index].title = post[index].title[:27] + '...'
-            data.append({
-                # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
-                "id": post[index].id,
-                "category": post[index].category,
-                "title": post[index].title,
-                "content": post[index].content,
-                "date": post[index].created_at
-            })
+            splitted_title = post[index].title.split()
+            splitted_content = post[index].content.split()
+            if len(splitted_title) > 10:
+                post[index].title = " ".join(map(str, splitted_title[:10])) + "..."
+            if len(splitted_content) > 30:
+                post[index].content = " ".join(map(str, splitted_content[:30])) + "..."
+            data.append(
+                {
+                    # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
+                    "id": post[index].id,
+                    "category": post[index].category,
+                    "title": post[index].title,
+                    "content": post[index].content,
+                    "date": post[index].created_at,
+                }
+            )
         else:
             break
     return data, max_length
@@ -181,7 +197,7 @@ def get_post(id):
     post = get_object_or_404(Post, id=int(id))
     parents = []
     children = {}
-    comments = post.comments.all().order_by('created_at').values()
+    comments = post.comments.all().order_by("created_at").values()
     comments_count = len(comments)
     for comment in comments:
         if comment["group"] == "0":
@@ -193,7 +209,7 @@ def get_post(id):
                 children[comment["group"]] = [comment]
 
     for parent in parents:
-        group = str(parent['id'])
+        group = str(parent["id"])
         if group in children.keys():
             parent["children"] = children[group]
 
@@ -250,11 +266,11 @@ def home(request, page=1):
         "nav_bar": nav_bar,
         "page": page,
     }
-    return render(request, 'home.html', context)
+    return render(request, "home.html", context)
 
 
 def contact(request):
-    return render(request, 'contact.html')
+    return render(request, "contact.html")
 
 
 def random_int(num, fr, to):
@@ -276,8 +292,8 @@ def post(request, id):
     # recent_posts = []
     # for i in indexes:
     #     recent_posts.append(recent_posts_data[i])
-    context = {'post': post_data}
-    return render(request, 'post.html', context)
+    context = {"post": post_data}
+    return render(request, "post.html", context)
 
 
 def find_category(regex):
@@ -286,8 +302,9 @@ def find_category(regex):
         if re.search(regex, category, re.IGNORECASE):
             return category
 
+
 def category(request, cat, page=1):
-    
+
     post = Category.objects.get(name=find_category(cat)).posts.all()
     max_length = len(post)
     data = []
@@ -295,15 +312,17 @@ def category(request, cat, page=1):
         index = i + (page - 1) * MAX_POST_CATEGORY_PAGE
         if index < max_length:
             if len(post[index].title) > 40:
-                post[index].title = post[index].title[:27] + '...'
-            data.append({
-                # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
-                "id": post[index].id,
-                "category": post[index].category,
-                "title": post[index].title,
-                "content": post[index].content,
-                "date": format_datetime(post[index].created_at)
-            })
+                post[index].title = post[index].title[:27] + "..."
+            data.append(
+                {
+                    # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
+                    "id": post[index].id,
+                    "category": post[index].category,
+                    "title": post[index].title,
+                    "content": post[index].content,
+                    "date": format_datetime(post[index].created_at),
+                }
+            )
         else:
             break
 
@@ -316,30 +335,30 @@ def category(request, cat, page=1):
     }
 
     print(data)
-    return render(request, f'{cat}.html', context)
+    return render(request, f"{cat}.html", context)
 
 
 def search_in_mongo(list_keywords):
     client = pymongo.MongoClient()
-    db = client['blog_data']
+    db = client["blog_data"]
     collection = db["blog_post"]
-    collection.create_index([('title', 'text'), ('content', 'text')])
+    collection.create_index([("title", "text"), ("content", "text")])
     keywords = []
     result_id = []
     result = []
-    
 
     for raw_keyword in list_keywords:
         # x = collection.find({"$text": {"$search": f'"{keyword}"'}})
         search_result = collection.find({"$text": {"$search": raw_keyword}})
-        keyword = collection.find({"$text": {"$search": raw_keyword}}).explain()["queryPlanner"]["winningPlan"][
-            "parsedTextQuery"]["terms"]
+        keyword = collection.find({"$text": {"$search": raw_keyword}}).explain()[
+            "queryPlanner"
+        ]["winningPlan"]["parsedTextQuery"]["terms"]
         if keyword:
             keywords = keyword.copy()
         for item in search_result:
             if item not in result_id:
-                result_id.append(item['id'])
-                result.append(get_post(item['id']))
+                result_id.append(item["id"])
+                result.append(get_post(item["id"]))
 
     return keywords, result
 
@@ -348,26 +367,30 @@ def load_dictionary():
     f = open("blog\\static\\dictionary.txt", "r")
     temp = f.read()
     temp = temp.replace("'", '"')
-    temp = temp[temp.find("{"):-1]
+    temp = temp[temp.find("{") : -1]
     dictionary = json.loads(temp)
     f.close()
     return dictionary
 
 
 def add_css_highlight_background(word):
-    return fr'<span style=color:red;font-weight:500;background-color:yellow>{word}</span>'
+    return (
+        fr"<span style=color:red;font-weight:500;background-color:yellow>{word}</span>"
+    )
+
 
 def find_keyword_pos(regex, item):
     matches = re.finditer(regex, item, re.MULTILINE | re.IGNORECASE)
     result = []
     for matchNum, match in enumerate(matches, start=1):
-        result.append(item[match.start():match.end()])
-    
+        result.append(item[match.start() : match.end()])
+
     return result
+
 
 def search(request, page=1):
     raw_request = unquote(str(request))
-    raw_keywords = raw_request[raw_request.find("keyword") + 8:-2]
+    raw_keywords = raw_request[raw_request.find("keyword") + 8 : -2]
     list_raw_keywords = raw_keywords.split(" ")
     keywords, search_result = search_in_mongo(list_raw_keywords)
     dictionary = load_dictionary()
@@ -378,15 +401,17 @@ def search(request, page=1):
         for keyword in keywords:
             if keyword in dictionary:
                 for value in dictionary[keyword]:
-                    for word in find_keyword_pos(value, item['title']):
-                        item['title'] = item['title'].replace(word, new_format(word))
-                    for word in find_keyword_pos(value, item['content']):
-                        item['content'] = item['content'].replace(word, new_format(word))
+                    for word in find_keyword_pos(value, item["title"]):
+                        item["title"] = item["title"].replace(word, new_format(word))
+                    for word in find_keyword_pos(value, item["content"]):
+                        item["content"] = item["content"].replace(
+                            word, new_format(word)
+                        )
             else:
-                for word in find_keyword_pos(keyword, item['title']):
-                    item['title'] = item['title'].replace(word, new_format(word))
-                for word in find_keyword_pos(keyword, item['content']):
-                    item['content'] = item['content'].replace(word, new_format(word))
+                for word in find_keyword_pos(keyword, item["title"]):
+                    item["title"] = item["title"].replace(word, new_format(word))
+                for word in find_keyword_pos(keyword, item["content"]):
+                    item["content"] = item["content"].replace(word, new_format(word))
     max_length = len(search_result)
 
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_SEARCH_RESULT)
@@ -394,27 +419,26 @@ def search(request, page=1):
     for i in range(MAX_SEARCH_RESULT):
         index = i + (page - 1) * MAX_POST_HOME_PAGE
         if index < max_length:
-            data.append({
-                "id": search_result[index]["id"],
-                "category": search_result[index]["category"],
-                "title": search_result[index]["title"],
-                "content": search_result[index]["content"],
-                "date": search_result[index]["date"]
-            })
+            data.append(
+                {
+                    "id": search_result[index]["id"],
+                    "category": search_result[index]["category"],
+                    "title": search_result[index]["title"],
+                    "content": search_result[index]["content"],
+                    "date": search_result[index]["date"],
+                }
+            )
         else:
             break
 
     if not search_result:
-        context = {
-            "not_found": True,
-            "keyword": raw_keywords
-        }
+        context = {"not_found": True, "keyword": raw_keywords}
     else:
         context = {
             "data": data,
             "nav_bar": nav_bar,
             "page": page,
-            "keyword": raw_keywords
+            "keyword": raw_keywords,
         }
 
-    return render(request, 'search.html', context)
+    return render(request, "search.html", context)

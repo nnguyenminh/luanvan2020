@@ -25,37 +25,6 @@ $("#leaveCommentForm").on("submit", function (e) {
     e.preventDefault();
 });
 
-// $("#replyCommentForm").on("submit", function (e) {
-//     var post_id      = document.getElementById("post_id").innerText;
-//     var parent_id    = $(this).parent().parent().find('#comment_id')[0].innerHTML;
-//     var author       = $(this).find('input').val()
-//     var content      = $(this).find('textarea').val();
-//     var dataString = '{ "post_id":"' + post_id + '",' +
-//         '"author":"' + standardize_request(author) + '",' +
-//         '"content":"' + standardize_request(content) + '"' +
-//         '"parent_id":"' + standardize_request(parent_id) + '",' +
-//         '}';
-
-//     $.ajax({
-//         type: "POST",
-//         url: "/blog/post_comment",
-//         contentType: 'application/json',
-//         data: dataString,
-//         success: function (dataserver) {
-//             if(!document.querySelect('li.comment div.comment-body ul.children')){
-//                 // Neu chua co thi tao ul, add li, roi dong ul
-//                 var ul = "<ul class='children'><li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div></li></ul>";
-//                 $(this).parent().append(ul);
-//             }
-//             else { // Con neu co roi thi add li
-//                     var li = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div></li>";
-//                 $(this).parent().find('ul.children').append(li);
-//             }
-//         }
-//     });
-//     e.preventDefault();
-// });
-
 $(function () {
     $.ajaxSetup({
         headers: { "X-CSRFToken": getCookie("csrftoken") }
@@ -101,28 +70,32 @@ function getNow() {
     return render_date
 }
 
-$(document).ready(function(){
+$(document).ready(function () {
     $(document).on("click", "a.replycm", function (e) {
         $("#replyCommentForm").remove();
         $(this).parent().append(
-            '<form id="replyCommentForm" style="margin-top: 15px;"><div class="form-group"><div class="row" style="margin-bottom: 10px;margin-left: 0;margin-right: 0;"><div class="col" style="padding: 0;"><input type="text" class="form-control" placeholder="Your name"></div></div><textarea type="text" class="form-control" id="formGroupExampleInput2" placeholder="Write here.." style="margin-bottom: 10px;"></textarea><input type="submit" class="btn btn-primary replycm" value="Send"><button class="btn btn-cancel">Cancel</button></div></form>'
+            '<form id="replyCommentForm" style="margin-top: 15px;"><div class="form-group"><div class="row" style="margin-bottom: 10px;margin-left: 0;margin-right: 0;"><div class="col" style="padding: 0;"><input type="text" class="form-control" placeholder="Your name"></div></div><textarea type="text" class="form-control" id="formGroupExampleInput2" placeholder="Write here.." style="margin-bottom: 10px;"></textarea><button type="button" class="btn btn-primary replycm">Comment</button><button class="btn btn-cancel">Cancel</button></div></form>'
         );
         e.preventDefault();
     })
+
     $(document).on('click', '#replyCommentForm button.btn-cancel', function () {
         $("#replyCommentForm").remove();
 
     })
-    $(document).on('submit','form', function(){
-        var post_id      = document.getElementById("post_id").innerText;
-        var parent_id    = $(this).parent().parent().find('#comment_id')[0].innerHTML;
-        var author       = $(this).find('input').val()
-        var content      = $(this).find('textarea').val();
+
+    $(document).on('click', 'button.replycm', function () {
+        var post_id = document.getElementById("post_id").innerText;
+        var parent_id = $("#replyCommentForm").parent().parent().find('#comment_id')[0].innerHTML;
+        var author = $(this).parent().find('input').val()
+        var content = $(this).parent().find('textarea').val();
         var dataString = '{ "post_id":"' + post_id + '",' +
             '"author":"' + standardize_request(author) + '",' +
             '"content":"' + standardize_request(content) + '",' +
             '"parent_id":"' + standardize_request(parent_id) + '"' +
             '}';
+
+        root = $(this).closest(".root-comment")
 
         $.ajax({
             type: "POST",
@@ -130,51 +103,14 @@ $(document).ready(function(){
             contentType: 'application/json',
             data: dataString,
             success: function (dataserver) {
-                if(!document.querySelect('li.comment div.comment-body ul.children')){
-                    // Neu chua co thi tao ul, add li, roi dong ul
-                    var ul = "<ul class='children'><li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div></li></ul>";
-                    $(this).parent().append(ul);
-                }
-                else { // Con neu co roi thi add li
-                        var li = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div></li>";
-                    $(this).parent().find('ul.children').append(li);
-                }
+                var li = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(dataserver.author) + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + replace_quotes(dataserver.content) + "</p><a class='replycm'>Reply</a></div></li>";
+                root.find("ul.children").append(li);
+
+                $("#replyCommentForm").remove();
             }
         });
-        e.preventDefault();
     })
 })
-
-// $(document).on("click", "a.replycm", function (e) {
-
-//     $("#replyCommentForm").remove();
-
-//     // $(this).parent().parent().append(
-//     //     '<div class="comment-form-wrap pt-5" id="replyComment">' +
-//     //     '<form id="replyCommentForm" class="p-5 bg-light">' +
-//     //     '<div class="form-group">' +
-//     //     '<label for="name">Name *</label>' +
-//     //     '<input type="text" class="form-control" id="name" required>' +
-//     //     '</div>' +
-//     //     '<div class="form-group">' +
-//     //     '<label for="message">Message *</label>' +
-//     //     '<textarea name="" id="message" cols="30" rows="10" class="form-control" required></textarea>' +
-//     //     '</div>' +
-//     //     '<div class="form-group">' +
-//     //     '<input type="submit" value="Post Comment" class="btn py-3 px-4 btn-primary">' +
-//     //     '<button class="btn">Close</button>' +
-//     //     '</div>' +
-//     //     '</form>' +
-//     //     '</div>');
-
-//     $(this).parent().append(
-//         '<form id="replyCommentForm" style="margin-top: 15px;"><div class="form-group"><div class="row" style="margin-bottom: 10px;margin-left: 0;margin-right: 0;"><div class="col" style="padding: 0;"><input type="text" class="form-control" placeholder="Your name"></div></div><textarea type="text" class="form-control" id="formGroupExampleInput2" placeholder="Write here.." style="margin-bottom: 10px;"></textarea><input type="submit" class="btn btn-primary replycm" value="Send"><button class="btn btn-cancel">Cancel</button></div></form>'
-//     );
-
-//     e.preventDefault();
-// });
-
-
 
 var data;
 
@@ -186,6 +122,15 @@ const preload_comments = (id) => {
         }
     })
 }
+
+// const load_recent_posts = (id) => {
+//     $.ajax("/blog/load_comments/post=" + id, {
+//         success: function (dataserver, status, xhr) {
+//             data = dataserver.reverse();
+//             loadComment();
+//         }
+//     })
+// }
 
 var start = 0;
 var stop = 1;
@@ -210,16 +155,19 @@ var loadComment = () => {
 }
 
 function render_group_comment(parent) {
-    var li = "<li class='comment'>";
+    var li = "<li class='comment root-comment'>";
     li += "<p id='comment_id'>" + parent.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(parent.author) + "</h3><div class='meta mb-3'>" + format_date(parent.created_at) + add_flag(parent.flag) + "</div><p>" + replace_quotes(parent.content) + "</p><a class='replycm'>Reply</a></div>"
     children = parent.children;
-    if(!!children) {
+    if (children) {
         li += "<ul class='children'>";
         for (index in children) {
             child = children[index];
             li += "<li class='comment'><p id='comment_id'>" + child.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + replace_quotes(child.author) + "</h3><div class='meta mb-3'>" + format_date(parent.created_at) + "</div><p>" + replace_quotes(child.reply) + "</p><p>" + replace_quotes(child.content) + "</p><a class='replycm'>Reply</a></div></li>";
         }
         li += "</ul>";
+    }
+    else {
+        li += "<ul class='children'></ul>"
     }
     li += "</li>";
     return li;
@@ -231,7 +179,7 @@ function format_date(date) {
 }
 
 function add_flag(is_flagged) {
-    if (is_flagged){
+    if (is_flagged) {
         return '<i style="position: relative; left:10px; color: red;" class="fas fa-flag"></i>'
     }
     else {
@@ -240,12 +188,12 @@ function add_flag(is_flagged) {
 }
 
 function replace_quotes(raw_string) {
-    result = raw_string.replaceAll("'",'"');
-    return result;    
+    result = raw_string.replaceAll("'", '"');
+    return result;
 }
 
 function standardize_request(raw_string) {
-    return raw_string.replaceAll('"',"'").replaceAll("\\","\\\\")
+    return raw_string.replaceAll('"', "'").replaceAll("\\", "\\\\")
 }
 
 
@@ -255,7 +203,7 @@ $(document).ready(function () {
     preload_comments(post_id);
 })
 
-window.onload = function(){
+window.onload = function () {
     var ps = document.getElementsByClassName("content");
-    for(p of ps) { p.innerHTML = p.textContent }
+    for (p of ps) { p.innerHTML = p.textContent }
 }
