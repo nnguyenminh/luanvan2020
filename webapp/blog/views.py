@@ -1,6 +1,6 @@
 import json
 from urllib.parse import unquote
-from random import randrange
+from random import sample
 import pymongo
 from bson import ObjectId, json_util
 from django.shortcuts import render, get_object_or_404
@@ -164,32 +164,55 @@ def read_post_all(request, page=1):
     return JsonResponse(data, safe=False)
 
 
-def get_recent_posts(page):
+def truncate(string, length):
+    splitted_string = string.split()
+    if len(splitted_string) > length:
+        return " ".join(map(str, splitted_string[:length])) + "..."
+    else:
+        return string
+
+
+def get_recent_posts(request="", page=1):
     post = Post.objects.all().order_by("created_at").reverse()
     max_length = len(post)
     data = []
     for i in range(MAX_POST_HOME_PAGE):
         index = i + (page - 1) * MAX_POST_HOME_PAGE
         if index < max_length:
-            splitted_title = post[index].title.split()
-            splitted_content = post[index].content.split()
-            if len(splitted_title) > 10:
-                post[index].title = " ".join(map(str, splitted_title[:10])) + "..."
-            if len(splitted_content) > 30:
-                post[index].content = " ".join(map(str, splitted_content[:30])) + "..."
             data.append(
                 {
                     # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
                     "id": post[index].id,
-                    "category": post[index].category,
-                    "title": post[index].title,
-                    "content": post[index].content,
-                    "date": post[index].created_at,
+                    "category": post[index].category.name,
+                    "title": truncate(post[index].title, 10),
+                    "content": truncate(post[index].content, 30),
+                    "date": format_datetime(post[index].created_at),
+                    "number_comments": post[index].comments.count()
                 }
             )
         else:
             break
-    return data, max_length
+
+    if request:
+        if request.method == "POST":
+            received_json_data = json.loads(request.body)
+            ran = int(received_json_data["random"])
+            print(ran)
+            except_id = int(received_json_data["except"])
+            print(except_id)
+            print(len(data))
+            for i in range(len(data)):
+                print(i)
+                if data[i]["id"] == except_id:
+                    data.pop(i)
+                    break
+            idx = sample(range(0,len(data)), ran)
+            print(idx)
+            response = [data[i] for i in idx]
+        return HttpResponse(json.dumps(response), content_type="application/json")
+
+    else:
+        return data, max_length
 
 
 def get_post(id):
@@ -259,7 +282,7 @@ def modify_bottom_nav_bar(max_length, page, MAX):
 
 
 def home(request, page=1):
-    data, max_length = get_recent_posts(page)
+    data, max_length = get_recent_posts(page=page)
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST_HOME_PAGE)
     context = {
         "data": data,
@@ -273,25 +296,8 @@ def contact(request):
     return render(request, "contact.html")
 
 
-def random_int(num, fr, to):
-    result = []
-    while True:
-        x = randrange(int(fr), int(to))
-        if x not in result:
-            result.append(x)
-        if len(result) == num:
-            break
-
-    return result
-
-
 def post(request, id):
     post_data = get_post(id)
-    # recent_posts_data = get_recent_posts(1)
-    # indexes = random_int(2, 0, MAX_POST-1)
-    # recent_posts = []
-    # for i in indexes:
-    #     recent_posts.append(recent_posts_data[i])
     context = {"post": post_data}
     return render(request, "post.html", context)
 

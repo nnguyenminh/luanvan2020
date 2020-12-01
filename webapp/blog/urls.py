@@ -16,5 +16,6 @@ urlpatterns = [
     path('search', views.search, name="search"),
     path('search/page=<int:page>', views.search, name="search"),
     path('post_comment', views.post_comment, name="post_comment"),
-    path('load_comments/post=<int:id>', views.load_comments, name="load_comments")
+    path('load_comments/post=<int:id>', views.load_comments, name="load_comments"),
+    path('get_recent_posts', views.get_recent_posts, name="get_recent_posts")
 ]

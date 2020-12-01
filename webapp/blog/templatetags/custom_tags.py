@@ -10,3 +10,8 @@ def replace_quotes(value):
 @register.filter
 def replace_plus(value):
     return value.replace("+", " ")
+
+@register.filter
+def format_date(date):
+    # return value.replace("+", " ")
+    return date["month"] + ". " + date["day"] + ", " + date["year"] + ", " + date["hour"] + ":" + date["minute"] + " " + date["AM-PM"]

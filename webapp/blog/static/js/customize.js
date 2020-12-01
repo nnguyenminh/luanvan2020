@@ -132,6 +132,37 @@ const preload_comments = (id) => {
 //     })
 // }
 
+function load_recent_posts () {
+    var post_id = document.getElementById("post_id").innerText;
+    var random = 3;
+    var dataString = '{ "random":"' + random + '",' +
+        '"except":"' + post_id + '"}';
+
+    $.ajax({
+        type: "POST",
+        url: "/blog/get_recent_posts",
+        contentType: 'application/json',
+        data: dataString,
+        success: function (dataserver, status, xhr) {
+            var div = ""
+            for (post of dataserver) {
+                div +=   '<div class="block-21 mb-4 d-flex">' +
+                            '<a class="blog-img mr-4" style="background-image: url( /static/images/image_1.jpg );"></a>' +
+                            '<div class="text" style="position: relative;">' +
+                                '<h3 class="heading"><a href="/blog/post/' + post.id + '">' + post.title + '</a></h3>' +
+                                '<div class="meta" style="position: absolute; bottom: 0px;">' +
+                                    '<div><a href="#"><span class="icon-calendar"></span>' + format_date(post.date) + '</a></div>' +
+                                    '<div><a href="#"><span class="icon-chat"></span>' + post.number_comments + '</a></div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>'             
+            }
+            document.getElementById("side_bar_recents").innerHTML += div;
+            
+        }
+    });
+};
+
 var start = 0;
 var stop = 1;
 
@@ -201,6 +232,7 @@ function standardize_request(raw_string) {
 $(document).ready(function () {
     var post_id = document.getElementById("post_id").innerText;
     preload_comments(post_id);
+    load_recent_posts();
 })
 
 window.onload = function () {
