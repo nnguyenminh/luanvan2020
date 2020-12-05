@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,6 +23,7 @@
 
 <body>
     {% include "snippet/header.html" %}
+    <p id="blockContent"></p>
     {% block content %}{% endblock %}
     {% include "snippet/footer.html" %}
     <script src=" {% static 'js/jquery3-4-0.min.js' %} "></script>

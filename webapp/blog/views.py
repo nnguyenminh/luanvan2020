@@ -9,8 +9,9 @@ import re
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from blog.forms import SignUpForm
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, ValidationError
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from blog.models import Post, Comment, Category
+from django.utils.translation import gettext as _
 from django.http import (
     HttpResponse,
     JsonResponse,
@@ -148,69 +149,6 @@ def post_comment(request):
         return HttpResponseBadRequest("Bad Request", content_type="application/json")
 
 
-def add_post(request):
-    if request.method == "POST":
-        received_json_data = json.loads(request.body)
-        # category = received_json_data['category']
-        title = received_json_data["title"]
-        content = received_json_data["content"]
-        for section in content:
-            section["section_content"] = section["section_content"].split("\n")
-        comment = received_json_data["comment"]
-        # tag = received_json_data["tag"].split(",")
-        # date = received_json_data["date"]
-        # author_details = {
-        #     "first_name": received_json_data["author_details"]["first_name"],
-        #     "last_name": received_json_data["author_details"]["last_name"]
-        # }
-        post = Post(category=category, title=title, content=content, comment=comment)
-        post.save()
-        return HttpResponse("Inserted")
-    return HttpResponseBadRequest("Bad Request", content_type="application/json")
-
-
-def update_post(request, id):
-    pass
-
-
-def delete_post(request, id):
-    pass
-
-
-def read_post(request, id):
-    if request.method == "GET":
-        post = Post.objects.get(_id=ObjectId(id))
-        data = {
-            "title": post.title,
-            "content": post.content,
-            "comment": post.comment,
-            "date": post.date,
-        }
-        return JsonResponse(data, safe=False)
-    return HttpResponseBadRequest("Bad Request", content_type="application/json")
-
-
-def read_post_all(request, page=1):
-    post = Post.objects.all().order_by("date")
-    data = []
-    for i in range(MAX_POST_HOME_PAGE):
-        index = i + (page - 1) * MAX_POST_HOME_PAGE
-        data.append(
-            {
-                "id": json.loads(
-                    json.dumps(post[index]._id, default=json_util.default)
-                )["$oid"],
-                # "category": post[index].category,
-                "title": post[index].title,
-                "content": post[index].content,
-                "comment": post[index].comment,
-                "date": post[index].date,
-            }
-        )
-        print(json.dumps(post[index]._id, default=json_util.default))
-    return JsonResponse(data, safe=False)
-
-
 def truncate(string, length):
     splitted_string = string.split()
     if len(splitted_string) > length:
@@ -219,7 +157,7 @@ def truncate(string, length):
         return string
 
 
-def get_recent_posts(request="", page=1):
+def get_recent_posts(request, page=1):
     post = Post.objects.all().order_by("created_at").reverse()
     max_length = len(post)
     data = []
@@ -231,26 +169,27 @@ def get_recent_posts(request="", page=1):
                     # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
                     "id": post[index].id,
                     "category": post[index].category.name,
-                    "title": truncate(post[index].title, 10),
-                    "content": truncate(post[index].content, 30),
-                    "date": format_datetime(post[index].created_at),
+                    "title": truncate(post[index].title, 10) if request.LANGUAGE_CODE == "en" else truncate(post[index].title_vn, 10),
+                    "content": truncate(post[index].content, 30) if request.LANGUAGE_CODE == "en" else truncate(post[index].content_vn, 30),
+                    "date": post[index].created_at,
                     "number_comments": post[index].comments.count()
                 }
             )
         else:
             break
 
-    if request:
-        if request.method == "POST":
-            received_json_data = json.loads(request.body)
-            ran = int(received_json_data["random"])
-            except_id = int(received_json_data["except"])
-            for i in range(len(data)):
-                if data[i]["id"] == except_id:
-                    data.pop(i)
-                    break
-            idx = sample(range(0,len(data)), ran)
-            response = [data[i] for i in idx]
+    if request.method == "POST":
+        received_json_data = json.loads(request.body)
+        ran = int(received_json_data["random"])
+        except_id = int(received_json_data["except"])
+        for i in range(len(data)):
+            if data[i]["id"] == except_id:
+                data.pop(i)
+                break
+        idx = sample(range(0,len(data)), ran)
+        response = [data[i] for i in idx]
+        for d in response:
+            d["date"] = format_datetime(d["date"])
         return HttpResponse(json.dumps(response), content_type="application/json")
 
     else:
@@ -324,7 +263,7 @@ def modify_bottom_nav_bar(max_length, page, MAX):
 
 
 def home(request, page=1):
-    data, max_length = get_recent_posts(page=page)
+    data, max_length = get_recent_posts(request,page=page)
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST_HOME_PAGE)
     context = {
         "data": data,
@@ -380,9 +319,8 @@ def category(request, cat, page=1):
         "data": data,
         "nav_bar": nav_bar,
         "page": page,
+        "nav_tab": cat
     }
-
-    print(data)
     return render(request, f"{cat}.html", context)
 
 

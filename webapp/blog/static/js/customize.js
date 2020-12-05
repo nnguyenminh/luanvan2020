@@ -1,28 +1,30 @@
-$("#leaveCommentForm").on("submit", function (e) {
-    var post_id = document.getElementById("post_id").innerText;
-    var author = $(this).find("#name").val();
-    var content = $(this).find("#message").val();
-    var dataString = '{ "post_id":"' + post_id + '",' +
-        '"author":"' + standardize_request(author) + '",' +
-        '"content":"' + standardize_request(content) + '"' +
-        '}';
+$(document).ready(function () {
+    $(document).on("click", "#leaveCommentForm button", function (e) {
+        var post_id = document.getElementById("post_id").innerText;
+        var author = $(this).parent().parent().find("#name").val();
+        var content = $(this).parent().parent().find("#message").val();
+        var dataString = '{ "post_id":"' + post_id + '",' +
+            '"author":"' + standardize_request(author) + '",' +
+            '"content":"' + standardize_request(content) + '"' +
+            '}';
 
-    $.ajax({
-        type: "POST",
-        url: "/blog/post_comment",
-        contentType: 'application/json',
-        data: dataString,
-        success: function (dataserver) {
-            var x = document.getElementById('commentList').innerHTML;
-            var comment = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div></li>";
-            x = comment + x;
-            document.getElementById("commentList").innerHTML = x;
-            $('#leaveCommentForm #message').val('');
-        }
+        $.ajax({
+            type: "POST",
+            url: "/en/blog/post_comment",
+            contentType: 'application/json',
+            data: dataString,
+            success: function (dataserver) {
+                var x = document.getElementById('commentList').innerHTML;
+                var comment = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div></li>";
+                x = comment + x;
+                document.getElementById("commentList").innerHTML = x;
+                $('#leaveCommentForm #message').val('');
+            }
+        });
+
+
+        e.preventDefault();
     });
-
-
-    e.preventDefault();
 });
 
 $(function () {
@@ -106,7 +108,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: "POST",
-            url: "/blog/post_comment",
+            url: "/en/blog/post_comment",
             contentType: 'application/json',
             data: dataString,
             success: function (dataserver) {
@@ -147,7 +149,7 @@ function load_recent_posts () {
 
     $.ajax({
         type: "POST",
-        url: "/blog/get_recent_posts",
+        url: "/en/blog/get_recent_posts",
         contentType: 'application/json',
         data: dataString,
         success: function (dataserver, status, xhr) {
@@ -259,7 +261,7 @@ function init_comment_func() {
                             '<textarea name="" id="message" cols="30" rows="10" class="form-control" required></textarea>' +
                         '</div>' +
                         '<div class="form-group">' +
-                            '<input type="submit" value="Post Comment" class="btn py-3 px-4 btn-primary">' +
+                            '<button type="button" class="btn py-3 px-4 btn-primary">Post Comment</button>' +
                         '</div>' +
                     '</form>'
 

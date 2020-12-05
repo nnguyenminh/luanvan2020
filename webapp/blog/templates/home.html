@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 {% load custom_tags %}
 {% block content %}
 <section class="ftco-section">
@@ -15,11 +16,11 @@
                         </div>
                         <div class="col-md-6 col-lg-6 col-xl-4 d-flex">
                             <div class="text w-100 pl-md-3">
-                                <span class="subheading">{{ post.category }}</span>
+                                <span class="subheading">{% trans post.category %}</span>
                                 <h2><a href=" {% url 'post' id=post.id %} ">{{ post.title|replace_quotes }}</a></h2>
                                 <div class="meta">
                                     <p class="mb-0 content">{{ post.content|replace_quotes }}</p>
-                                    <p class="mb-0">{{ post.date|format_date }}</p>
+                                    <p class="mb-0">{{ post.date }}</p>
                                 </div>
                             </div>
                         </div>
