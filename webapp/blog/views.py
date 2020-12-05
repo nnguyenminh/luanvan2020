@@ -3,15 +3,19 @@ from urllib.parse import unquote
 from random import sample
 import pymongo
 from bson import ObjectId, json_util
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 import re
+from django.contrib.auth import login, authenticate, logout
+from blog.forms import SignUpForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, ValidationError
 from blog.models import Post, Comment, Category
 from django.http import (
     HttpResponse,
     JsonResponse,
     HttpResponseNotAllowed,
     HttpResponseBadRequest,
+    HttpResponseRedirect
 )
 
 MAX_POST_HOME_PAGE = 4
@@ -21,7 +25,50 @@ MAX_SEARCH_RESULT = 10
 
 
 # Create your views here.
+def signup(request):
+    if request.method == 'POST':
+            form = SignUpForm(request.POST)
+            if form.is_valid():
+                form.save()
+                username = form.cleaned_data.get('username')
+                raw_password = form.cleaned_data.get('password1')
+                user = authenticate(username=username, password=raw_password)
+                login(request, user)
+                redirect_to = request.POST.get('next', '')
+                print(redirect_to)
+                if redirect_to == "/blog/login/" or redirect_to == "http://192.168.1.10:5000/blog/login/":
+                    redirect('home')
+                return HttpResponseRedirect(redirect_to)
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
 
+def login_user(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        raw_password = request.POST['password']
+        user = authenticate(username=username, password=raw_password)
+        if user is not None:
+            login(request, user)
+            redirect_to = request.POST.get('next', '').replace("/blog/login/?next=","")
+            print(redirect_to)
+            if redirect_to == "/blog/login/" or redirect_to == "http://192.168.1.10:5000/blog/login/":
+                    redirect('home')
+            return HttpResponseRedirect(redirect_to)
+        else:
+            form = AuthenticationForm()
+            error = "Username or password is not correct"
+            return render(request, 'login.html', {'form': form, 'error': error})
+    else:
+        form = AuthenticationForm()
+        return render(request, 'login.html', {'form': form})
+
+def logout_user(request):
+    logout(request)
+    redirect_to = request.GET.get('next', '')
+    print(redirect_to)
+    return HttpResponseRedirect(redirect_to)
+    
 
 def format_datetime(datetime):
     date = {}
@@ -197,17 +244,12 @@ def get_recent_posts(request="", page=1):
         if request.method == "POST":
             received_json_data = json.loads(request.body)
             ran = int(received_json_data["random"])
-            print(ran)
             except_id = int(received_json_data["except"])
-            print(except_id)
-            print(len(data))
             for i in range(len(data)):
-                print(i)
                 if data[i]["id"] == except_id:
                     data.pop(i)
                     break
             idx = sample(range(0,len(data)), ran)
-            print(idx)
             response = [data[i] for i in idx]
         return HttpResponse(json.dumps(response), content_type="application/json")
 
@@ -303,7 +345,7 @@ def post(request, id):
 
 
 def find_category(regex):
-    categories = ["technology", "tutorial", "design"]
+    categories = ["Technology", "Tutorial", "Design"]
     for category in categories:
         if re.search(regex, category, re.IGNORECASE):
             return category
@@ -381,7 +423,7 @@ def load_dictionary():
 
 def add_css_highlight_background(word):
     return (
-        fr"<span style=color:red;font-weight:500;background-color:yellow>{word}</span>"
+        fr"<span style=background-color:yellow>{word}</span>"
     )
 
 

@@ -15,3 +15,7 @@ def replace_plus(value):
 def format_date(date):
     # return value.replace("+", " ")
     return date["month"] + ". " + date["day"] + ", " + date["year"] + ", " + date["hour"] + ":" + date["minute"] + " " + date["AM-PM"]
+
+@register.filter
+def refer_next(value):
+    return value[value.find["next"] + 4: ]
