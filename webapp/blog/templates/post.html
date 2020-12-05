@@ -32,43 +32,11 @@
                 <div class="pt-5 mt-5" id="commentContainer">
                     <h3 class="mb-5">{{ post.comments_count }} Comments</h3>
                     <ul class="comment-list" id="commentList">
-                        <!-- {% for parent in post.comments %} -->
-                        <!-- <li class="comment" id="father"> -->
-                           <!--  <p id="comment_group_id">{{ parent.id }}</p>
-                            <div class="vcard bio">
-                                <img src=" {% static 'images/person_1.jpg' %} " alt="Image placeholder">
-                            </div>
-                            <div class="comment-body">
-                                <h3>{{ parent.author }}</h3>
-                                <div class="meta mb-3">{{ parent.created_at }}</div>
-                                <p>{{  parent.content|linebreaks }}</p>
-                                <p><a href="#" class="reply">Reply</a></p>
-                            </div> -->
-<!--                             {% if parent.children %} -->
-                            <!-- <ul class="children" id="son"> -->
-<!--                                 {% for child in parent.children %}
-                                <li class="comment">
-                                <div class="vcard bio">
-                                    <img src=" {% static 'images/person_1.jpg' %} " alt="Image placeholder">
-                                </div>
-                                <div class="comment-body">
-                                    <h3>{{ child.author }}</h3>
-                                    <div class="meta mb-3">{{ child.created_at }}</div>
-                                    <p>{{ child.reply }}</p>
-                                    <p>{{ child.content }}</p>
-                                    <p><a href="#" class="reply">Reply</a></p>
-                                </div>
-                                </li>
-                                {% endfor %} -->
-                            <!-- </ul> -->
-                            <!-- {% endif %} -->
-                        <!-- </li> -->
-                        <!-- {% endfor %} -->
                     </ul>
                     <!-- END comment-list -->
                     <button id="viewMoreComment" class="btn" onclick="loadComment()">View more comments</button>                    
                     <div class="comment-form-wrap pt-5" id="leaveComment">
-                        <button class="btn" data-toggle="collapse" data-target="#leaveCommentForm" ><h3>Leave a comment</h3></button>
+                        <!-- <button class="btn" data-toggle="collapse" data-target="#leaveCommentForm" ><h3>Leave a comment</h3></button>
                         <form id="leaveCommentForm" class="p-5 bg-light collapse">
                             <div class="form-group">
                                 <label for="name">Name *</label>
@@ -81,10 +49,8 @@
                             <div class="form-group">
                                 <input type="submit" value="Post Comment" class="btn py-3 px-4 btn-primary">
                             </div>
-                        </form>
+                        </form> -->
                     </div>
-
-                    <!-- <button class="btn-primary" onclick="sayHello()">CLICK ME!</button> -->
                 </div>
             </div> <!-- .col-md-8 -->
             <div class="col-lg-4 sidebar pl-lg-5 ftco-animate">

@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 import re
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
 from blog.forms import SignUpForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, ValidationError
 from blog.models import Post, Comment, Category
@@ -81,7 +82,6 @@ def format_datetime(datetime):
     date["AM-PM"] = "a.m." if datetime.strftime("%p") == "AM" else "p.m."
     return date
 
-
 def load_comments(request, id):
     post = get_object_or_404(Post, id=int(id))
     parents = []
@@ -111,7 +111,7 @@ def load_comments(request, id):
 
     return HttpResponse(json.dumps(parents), content_type="application/json")
 
-
+@login_required
 @csrf_exempt
 def post_comment(request):
     try:

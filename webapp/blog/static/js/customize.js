@@ -71,12 +71,19 @@ function getNow() {
 }
 
 $(document).ready(function () {
-    $(document).on("click", "a.replycm", function (e) {
-        $("#replyCommentForm").remove();
-        $(this).parent().append(
-            '<form id="replyCommentForm" style="margin-top: 15px;"><div class="form-group"><div class="row" style="margin-bottom: 10px;margin-left: 0;margin-right: 0;"><div class="col" style="padding: 0;"><input type="text" class="form-control" placeholder="Your name"></div></div><textarea type="text" class="form-control" id="formGroupExampleInput2" placeholder="Write here.." style="margin-bottom: 10px;"></textarea><button type="button" class="btn btn-primary replycm">Comment</button><button class="btn btn-cancel">Cancel</button></div></form>'
-        );
-        e.preventDefault();
+    
+    $(document).on("click", "a.replycm", function () {
+        if(sessionStorage.getItem("loginStatus") == "loggedIn") {
+            $("#replyCommentForm").remove();
+            $(this).parent().append(
+                '<form id="replyCommentForm" style="margin-top: 15px;"><div class="form-group"><div class="row" style="margin-bottom: 10px;margin-left: 0;margin-right: 0;"><div class="col" style="padding: 0;"><input type="text" class="form-control" value="' + usr.innerHTML + '" readonly required></div></div><textarea type="text" class="form-control" id="formGroupExampleInput2" placeholder="Write here.." style="margin-bottom: 10px;" required></textarea><button type="button" class="btn btn-primary replycm">Comment</button><button class="btn btn-cancel">Cancel</button></div></form>'
+            );
+        } else {
+            $("#loginReminder").remove()
+            $(this).parent().append(
+                '<p id="loginReminder"><a href="'+ document.getElementById("login").getAttribute("href") +'">Login</a> to leave comments</p>'
+            );
+        }
     })
 
     $(document).on('click', '#replyCommentForm button.btn-cancel', function () {
@@ -227,12 +234,51 @@ function standardize_request(raw_string) {
     return raw_string.replaceAll('"', "'").replaceAll("\\", "\\\\")
 }
 
+var usr;
+function is_logged_in() {
+    username = document.getElementById("username");
+    if(username) {
+        sessionStorage.setItem('loginStatus','loggedIn');
+    }
+    else {
+        sessionStorage.setItem('loginStatus','');
+    };
+    usr = username;
+}
+
+function init_comment_func() {
+    if(sessionStorage.getItem('loginStatus') == 'loggedIn') {
+        var html =  '<button class="btn" data-toggle="collapse" data-target="#leaveCommentForm" ><h3>Leave a comment</h3></button>' +
+                    '<form id="leaveCommentForm" class="p-5 bg-light collapse">' +
+                        '<div class="form-group">' +
+                            '<label for="name">Name *</label>' +
+                            '<input type="text" class="form-control" id="name" value="' + usr.innerHTML + '" readonly required>' +
+                        '</div>' +
+                        '<div class="form-group">' +
+                            '<label for="message">Message *</label>' +
+                            '<textarea name="" id="message" cols="30" rows="10" class="form-control" required></textarea>' +
+                        '</div>' +
+                        '<div class="form-group">' +
+                            '<input type="submit" value="Post Comment" class="btn py-3 px-4 btn-primary">' +
+                        '</div>' +
+                    '</form>'
+
+        
+    }
+    else {
+        console.log("else")
+        var html = '<h3><a href="'+ document.getElementById("login").getAttribute("href") +'">Login</a> to leave comments</h3>'
+    };
+    document.getElementById("commentContainer").innerHTML += html
+}
 
 
 $(document).ready(function () {
     var post_id = document.getElementById("post_id").innerText;
     preload_comments(post_id);
     load_recent_posts();
+    is_logged_in();
+    init_comment_func();
 })
 
 window.onload = function () {
