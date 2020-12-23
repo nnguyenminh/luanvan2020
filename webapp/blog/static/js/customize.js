@@ -15,7 +15,7 @@ $(document).ready(function () {
             data: dataString,
             success: function (dataserver) {
                 var x = document.getElementById('commentList').innerHTML;
-                var comment = "<li class='comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div></li>";
+                var comment = "<li class='comment root-comment'><p id='comment_id' hidden>" + dataserver.id + "</p><div class='vcard bio'><img src='/static/images/person_1.jpg' alt='Image placeholder'></div><div class='comment-body'><h3>" + dataserver.author + "</h3><div class='meta mb-3'>" + format_date(dataserver.created_at) + "</div><p>" + dataserver.content + "</p><a class='replycm'>Reply</a></div><ul class='children'></ul></li>";
                 x = comment + x;
                 document.getElementById("commentList").innerHTML = x;
                 $('#leaveCommentForm #message').val('');
@@ -220,7 +220,7 @@ function format_date(date) {
 
 function add_flag(is_flagged) {
     if (is_flagged) {
-        return '<i style="position: relative; left:10px; color: red;" class="fas fa-flag"></i>'
+        return '<i style="position: relative; left:10px; color: red;" class="fas fa-flag"></i><span style="position: relative; left:15px;">WARNING</span>'
     }
     else {
         return ""
