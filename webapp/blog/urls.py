@@ -12,7 +12,10 @@ urlpatterns = [
     path('post_comment', views.post_comment, name="post_comment"),
     path('load_comments/post=<int:id>', views.load_comments, name="load_comments"),
     path('get_recent_posts', views.get_recent_posts, name="get_recent_posts"),
-    path('signup/', views.signup, name="signup"),
-    path('login/', views.login_user, name="login"),
-    path('logout/', views.logout_user, name="logout")
+    # path('accounts/signup/', views.signup, name="signup"),
+    # path('accounts/login/', views.login_user, name="login"),
+    path('logout/', views.logout_user, name="logout"),
+    path('admin/', views.admin, name="admin"),
+    path('admin/post/create/', views.create_post, name="create_post"),
+    path('admin/post/update/<str:id>', views.update_post, name="update_post"),
 ]

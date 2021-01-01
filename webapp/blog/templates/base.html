@@ -19,12 +19,16 @@
     <link rel="stylesheet" href=" {% static 'css/icomoon.css' %} ">
     <link rel="stylesheet" href=" {% static 'css/style.css' %}?{% now 'U' %} ">
     <link rel="stylesheet" href=" {% static 'css/icon.css' %} ">
+    <!-- <script src="https://cdn.ckeditor.com/ckeditor5/24.0.0/inline/ckeditor.js"></script> -->
+    <script src=" {% static 'js/ckeditor5-inline-custom/ckeditor.js' %} "></script>
+    <link rel="stylesheet" href=" {% static 'css/customize.css' %} ">
 </head>
 
 <body>
     {% include "snippet/header.html" %}
     <p id="blockContent"></p>
-    {% block content %}{% endblock %}
+    {% block content %}
+    {% endblock %}
     {% include "snippet/footer.html" %}
     <script src=" {% static 'js/jquery3-4-0.min.js' %} "></script>
     <script src=" {% static 'js/jquery.validate.min.js' %} "></script>

@@ -6,7 +6,7 @@ from bson import ObjectId, json_util
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 import re
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout, get_user
 from django.contrib.auth.decorators import login_required
 from blog.forms import SignUpForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -17,7 +17,7 @@ from django.http import (
     JsonResponse,
     HttpResponseNotAllowed,
     HttpResponseBadRequest,
-    HttpResponseRedirect
+    HttpResponseRedirect,
 )
 
 MAX_POST_HOME_PAGE = 4
@@ -27,50 +27,137 @@ MAX_SEARCH_RESULT = 10
 
 
 # Create your views here.
+
+
+@login_required
+def admin(request):
+    user = get_user(request)
+    if user.is_superuser:
+        return render(request, "admin.html")
+    else:
+        return HttpResponseNotAllowed("Not allowed")
+
+
+@login_required
+def create_post(request):
+    user = get_user(request)
+    if user.is_superuser:
+        if request.method == "POST":
+            received_json_data = json.loads(request.body)
+            category = received_json_data["category"]
+            title = received_json_data["title"]
+            content = received_json_data["content"]
+            title_vn = received_json_data["title_vn"]
+            content_vn = received_json_data["content_vn"]
+            post = Post(
+                category=Category.objects.get(name=category),
+                title=title,
+                content=content,
+                title_vn=title_vn,
+                content_vn=content_vn,
+            )
+            post.save()
+        return render(request, "create_post.html")
+    else:
+        return HttpResponseNotAllowed("Not allowed")
+
+
+@login_required
+def update_post(request, id):
+    user = get_user(request)
+    if user.is_superuser:
+        if id == "all":
+            posts = Post.objects.all()
+            data = []
+            for post in posts:
+                data.append({"id": post.id, "title": post.title})
+            return render(request, "posts_management.html", {"posts": data})
+        else:
+            if request.method == "POST":
+                received_json_data = json.loads(request.body)
+                category = received_json_data["category"]
+                title = received_json_data["title"]
+                content = received_json_data["content"]
+                title_vn = received_json_data["title_vn"]
+                content_vn = received_json_data["content_vn"]
+                post = get_object_or_404(Post, id=int(id))
+                post.category = Category.objects.get(name=category)
+                post.title = title
+                post.content = content
+                post.title_vn = title_vn
+                post.content_vn = content_vn
+                post.save()
+                return redirect(f"/blog/admin/post/update/{int(id)}")
+            else:
+                post = get_object_or_404(Post, id=int(id))
+                data = {
+                    "id": post.id,
+                    "category": post.category,
+                    "title": post.title,
+                    "content": post.content,
+                    "title_vn": post.title_vn,
+                    "content_vn": post.content_vn,
+                }
+                return render(request, "update_post.html", {"post": data})
+    else:
+        return HttpResponseNotAllowed("Not allowed")
+
+
 def signup(request):
-    if request.method == 'POST':
-            form = SignUpForm(request.POST)
-            if form.is_valid():
-                form.save()
-                username = form.cleaned_data.get('username')
-                raw_password = form.cleaned_data.get('password1')
-                user = authenticate(username=username, password=raw_password)
-                login(request, user)
-                redirect_to = request.POST.get('next', '')
-                print(redirect_to)
-                if redirect_to == "/blog/login/" or redirect_to == "http://192.168.1.10:5000/blog/login/":
-                    redirect('home')
-                return HttpResponseRedirect(redirect_to)
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get("username")
+            raw_password = form.cleaned_data.get("password1")
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            redirect_to = (
+                request.POST.get("next", "")
+                .replace("/accounts/login/?next=", "")
+                .replace("/en", "")
+            )
+            if "accounts/login/" in redirect_to or redirect_to == "":
+                return redirect("home")
+            return HttpResponseRedirect(redirect_to)
     else:
         form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, "signup.html", {"form": form})
+
 
 def login_user(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        raw_password = request.POST['password']
+    if request.method == "POST":
+        username = request.POST["username"]
+        raw_password = request.POST["password"]
         user = authenticate(username=username, password=raw_password)
         if user is not None:
             login(request, user)
-            redirect_to = request.POST.get('next', '').replace("/blog/login/?next=","")
+            redirect_to = str(request)[str(request).find("next") + 8 : -2]
             print(redirect_to)
-            if redirect_to == "/blog/login/" or redirect_to == "http://192.168.1.10:5000/blog/login/":
-                    redirect('home')
+            # redirect_to = (
+            #     request.POST.get("next", "")
+            #     .replace("/accounts/login/?next=", "")
+            #     .replace("/en", "")
+            #     .replace("/vi","")
+            # )
+            if "accounts/login/" in redirect_to or redirect_to == "":
+                return redirect("home")
             return HttpResponseRedirect(redirect_to)
         else:
             form = AuthenticationForm()
             error = "Username or password is not correct"
-            return render(request, 'login.html', {'form': form, 'error': error})
+            return render(request, "login.html", {"form": form, "error": error})
     else:
         form = AuthenticationForm()
-        return render(request, 'login.html', {'form': form})
+        return render(request, "login.html", {"form": form})
+
 
 def logout_user(request):
     logout(request)
-    redirect_to = request.GET.get('next', '')
+    redirect_to = request.GET.get("next", "")
     print(redirect_to)
     return HttpResponseRedirect(redirect_to)
-    
+
 
 def format_datetime(datetime):
     date = {}
@@ -82,6 +169,7 @@ def format_datetime(datetime):
     date["second"] = datetime.strftime("%S")
     date["AM-PM"] = "a.m." if datetime.strftime("%p") == "AM" else "p.m."
     return date
+
 
 def load_comments(request, id):
     post = get_object_or_404(Post, id=int(id))
@@ -111,6 +199,7 @@ def load_comments(request, id):
             parent["children"] = children[group]
 
     return HttpResponse(json.dumps(parents), content_type="application/json")
+
 
 @login_required
 @csrf_exempt
@@ -169,10 +258,14 @@ def get_recent_posts(request, page=1):
                     # "id": json.loads(json.dumps(post[index]._id, default=json_util.default))["$oid"],
                     "id": post[index].id,
                     "category": post[index].category.name,
-                    "title": truncate(post[index].title, 10) if request.LANGUAGE_CODE == "en" else truncate(post[index].title_vn, 10),
-                    "content": truncate(post[index].content, 30) if request.LANGUAGE_CODE == "en" else truncate(post[index].content_vn, 30),
+                    "title": truncate(post[index].title, 10)
+                    if request.LANGUAGE_CODE == "en"
+                    else truncate(post[index].title_vn, 10),
+                    "content": truncate(post[index].content, 30)
+                    if request.LANGUAGE_CODE == "en"
+                    else truncate(post[index].content_vn, 30),
                     "date": post[index].created_at,
-                    "number_comments": post[index].comments.count()
+                    "number_comments": post[index].comments.count(),
                 }
             )
         else:
@@ -186,7 +279,7 @@ def get_recent_posts(request, page=1):
             if data[i]["id"] == except_id:
                 data.pop(i)
                 break
-        idx = sample(range(0,len(data)), ran)
+        idx = sample(range(0, len(data)), ran)
         response = [data[i] for i in idx]
         for d in response:
             d["date"] = format_datetime(d["date"])
@@ -263,7 +356,7 @@ def modify_bottom_nav_bar(max_length, page, MAX):
 
 
 def home(request, page=1):
-    data, max_length = get_recent_posts(request,page=page)
+    data, max_length = get_recent_posts(request, page=page)
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST_HOME_PAGE)
     context = {
         "data": data,
@@ -291,7 +384,6 @@ def find_category(regex):
 
 
 def category(request, cat, page=1):
-
     post = Category.objects.get(name=find_category(cat)).posts.all()
     max_length = len(post)
     data = []
@@ -315,12 +407,7 @@ def category(request, cat, page=1):
 
     nav_bar = modify_bottom_nav_bar(max_length, page, MAX_POST_CATEGORY_PAGE)
 
-    context = {
-        "data": data,
-        "nav_bar": nav_bar,
-        "page": page,
-        "nav_tab": cat
-    }
+    context = {"data": data, "nav_bar": nav_bar, "page": page, "nav_tab": cat}
     return render(request, f"{cat}.html", context)
 
 
@@ -334,7 +421,6 @@ def search_in_mongo(list_keywords):
     result = []
 
     for raw_keyword in list_keywords:
-        # x = collection.find({"$text": {"$search": f'"{keyword}"'}})
         search_result = collection.find({"$text": {"$search": raw_keyword}})
         keyword = collection.find({"$text": {"$search": raw_keyword}}).explain()[
             "queryPlanner"
@@ -360,9 +446,7 @@ def load_dictionary():
 
 
 def add_css_highlight_background(word):
-    return (
-        fr"<span style=background-color:yellow>{word}</span>"
-    )
+    return fr"<span style=background-color:yellow>{word}</span>"
 
 
 def find_keyword_pos(regex, item):

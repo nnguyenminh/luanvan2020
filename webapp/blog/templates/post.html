@@ -10,8 +10,8 @@
                     <img src=" {% static 'images/image_1.jpg' %} " alt="" class="img-fluid">
                 </p>
                 <p id="post_id" hidden>{{ post.id }}</p>
-                <h2>{{post.title|replace_quotes}}</h2>
-                {{post.content|replace_quotes|safe|linebreaks}}
+                <h2>{{post.title|safe}}</h2>
+                {{post.content|replace_quotes|safe}}
                 <div class="tag-widget post-tag-container mb-5 mt-5">
                     <div class="tagcloud">
                         <a href="#" class="tag-cloud-link">Life</a>

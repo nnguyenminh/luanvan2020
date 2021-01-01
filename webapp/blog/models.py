@@ -30,12 +30,12 @@ class Category(models.Model):
 
 class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, related_name='children', null=True)
     title = models.CharField(max_length=255)
     title_vn = models.CharField(max_length=255)
     content = models.TextField()
     content_vn = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
     # publish = models.DateTimeField(auto_now=False, auto_now_add=False)
     objects = models.DjongoManager()
 
