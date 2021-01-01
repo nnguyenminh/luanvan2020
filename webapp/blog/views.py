@@ -213,7 +213,7 @@ def post_comment(request):
             content = received_json_data["content"]
             post_id = received_json_data["post_id"]
 
-            if received_json_data["parent_id"]:
+            if "parent_id" in received_json_data:
                 print("yes")
                 parent_id = received_json_data["parent_id"]
                 comment = Comment(
